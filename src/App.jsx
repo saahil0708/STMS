@@ -1,15 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TopNav from './Components/Student/Top_Navbar';
+import Sidebar from './Components/Student/Sidebar';
 import StatsCards from './Components/Student/StatCard';
 import CourseProgress from './Components/Student/CourseProgress';
 import RecentActivities from './Components/Student/RecentActivities';
 import QuickActions from './Components/Student/QuickActions';
 
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation */}
-      <TopNav />
+      <TopNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      
+      {/* Sidebar */}
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       
       {/* Main Content */}
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">

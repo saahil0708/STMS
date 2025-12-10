@@ -7,8 +7,7 @@ import {
   Bars3BottomRightIcon
 } from '@heroicons/react/24/outline';
 
-const TopNav = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+const TopNav = ({ sidebarOpen, setSidebarOpen }) => {
   const [scrolled, setScrolled] = useState(false);
 
   // Handle scroll effect
@@ -61,15 +60,14 @@ const TopNav = () => {
 
           {/* Right Section */}
           <div className="flex items-center space-x-4">
-            {/* Mobile Search Button */}
-            <button className="md:hidden p-2 text-gray-500 hover:text-gray-600">
-              <MagnifyingGlassIcon className="h-5 w-5" />
-            </button>
-
-            {/* Notifications */}
-            <button className="relative p-2 text-black hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300">
+            {/* Menu Button */}
+            <button 
+              id="menu-button"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="relative p-2 text-black hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300"
+              aria-label="Toggle sidebar"
+            >
               <Bars3BottomRightIcon className={scrolled ? "h-7 w-7" : "h-7 w-7"} />
-              {/* <span className="absolute top-1 right-1 h-2 w-2 bg-red-700 rounded-full"></span> */}
             </button>
           </div>
         </div>
