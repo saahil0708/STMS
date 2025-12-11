@@ -13,6 +13,14 @@ import {
   ChevronRight,
   LogOut
 } from 'lucide-react';
+import {
+  CalendarDaysIcon,
+  DocumentTextIcon,
+  CheckCircleIcon,
+  ChartBarIcon,
+  ChatBubbleLeftEllipsisIcon,
+  ClipboardDocumentListIcon
+} from '@heroicons/react/24/outline';
 
 // interface SidebarProps {
 //   sidebarOpen: boolean;
@@ -22,13 +30,12 @@ import {
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigation = [
     { name: 'Dashboard', icon: Home, current: true },
-    { name: 'My Courses', icon: BookOpen, current: false },
-    { name: 'Training Calendar', icon: Calendar, current: false },
-    { name: 'Progress Reports', icon: BarChart3, current: false },
-    { name: 'Assignments', icon: FileText, current: false },
-    { name: 'Discussion Forums', icon: Users, current: false },
+    { name: 'Attendance History', icon: CalendarDaysIcon, current: false },
+    { name: 'Homework', icon: DocumentTextIcon, current: false },
+    { name: 'Homework Status', icon: CheckCircleIcon, current: false },
+    { name: 'Scores', icon: ChartBarIcon, current: false },
+    { name: 'Feedback Forms', icon: ClipboardDocumentListIcon, current: false },
     { name: 'Settings', icon: Settings, current: false },
-    { name: 'Help & Support', icon: HelpCircle, current: false },
   ];
 
   useEffect(() => {
@@ -100,12 +107,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </button>
 
         <div className="flex items-center p-6 border-b border-gray-100">
-          <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-500/30">
-            <GraduationCap className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-500/30 overflow-hidden">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Student" className="h-10 w-10" />
           </div>
           <div className="ml-3">
-            <span className="text-lg font-bold text-gray-900">TrainingHub</span>
-            <div className="text-xs text-gray-500 font-medium">Student Portal</div>
+            <span className="text-lg font-bold text-gray-900">Alex Johnson</span>
+            <div className="text-xs text-gray-500 font-medium">Roll No: STU-2023-001</div>
           </div>
         </div>
 
@@ -166,9 +173,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center px-4 py-3 text-sm font-semibold text-white bg-red-700 rounded-lg hover:bg-red-800 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 group"
+              className="w-full flex items-center justify-center px-4 py-3 text-sm font-semibold text-white bg-red-700 rounded-lg hover:bg-red-800 hover:shadow-lg active:scale-95 transition-all duration-200 group"
             >
-              <LogOut className="h-5 w-5 mr-2 transition-transform duration-200 group-hover:scale-125" />
+              <LogOut className="h-5 w-5 mr-2 transition-transform duration-200" />
               <span>Sign Out</span>
             </button>
           </div>
