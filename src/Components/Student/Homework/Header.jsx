@@ -13,7 +13,7 @@ const HomeworkHeader = ({ studentData, onBack }) => {
     <div className="bg-white border-b border-gray-200">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Simple Navigation */}
-        <div className="py-4">
+        <div className="py-3">
           <div className="flex items-center">
             <button
               onClick={onBack}
@@ -28,7 +28,7 @@ const HomeworkHeader = ({ studentData, onBack }) => {
 
         {/* Summary Cards */}
         <div className="pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex items-center">
                 <div className="bg-red-50 p-2 rounded-lg mr-3">
@@ -64,10 +64,10 @@ const HomeworkHeader = ({ studentData, onBack }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Student Info Bar */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="pt-6 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-sm text-gray-600">
                 <CalendarIcon className="h-4 w-4 mr-2" />
