@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import TopNav from '../../Components/Student/Top_Navbar';
+import TopNav from '../../Components/Global/Top_Navbar';
 import Sidebar from '../../Components/Student/Sidebar';
-import TodayClass from '../../Components/Student/TodayClass';
-import NoClassesToday from '../../Components/Student/NoClass';
-import CourseProgress from '../../Components/Student/CourseProgress';
-import RecentActivities from '../../Components/Student/RecentActivities';
-import QuickActions from '../../Components/Student/QuickActions';
+import TodayClass from '../../Components/Student/Home/TodayClass';
+import NoClassesToday from '../../Components/Student/Home/NoClass';
+import CourseProgress from '../../Components/Student/Home/CourseProgress';
+import RecentActivities from '../../Components/Student/Home/RecentActivities';
+import QuickActions from '../../Components/Student/Home/QuickActions';
 
-function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const hasClassesToday = false; // Change to false to test NoClassesToday component
+function Home() {
+  const hasClassesToday = true; // Change to false to test NoClassesToday component
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,4 +48,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;

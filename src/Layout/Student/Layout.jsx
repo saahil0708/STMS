@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import TopNav from "../../Components/Student/Top_Navbar";
+import TopNav from "../../Components/Global/Top_Navbar";
 import Sidebar from "../../Components/Student/Sidebar";
 
 const StudentLayout = () => {
