@@ -21,7 +21,10 @@ import {
   ChatBubbleLeftEllipsisIcon,
   ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useLogin } from '../../Context/LoginContext';
+import { useState } from 'react';
+import axios from 'axios';
 
 // interface SidebarProps {
 //   sidebarOpen: boolean;
@@ -29,6 +32,9 @@ import { NavLink } from 'react-router-dom';
 // }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+  const { logout } = useLogin();
+  const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigation = [
     { name: 'Dashboard', icon: Home, to: '/' },
     { name: 'Attendance History', icon: CalendarDaysIcon, to: '/attendance' },
@@ -45,10 +51,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       const menuButton = document.getElementById('menu-button');
 
       if (sidebarOpen &&
-          sidebar &&
-          !sidebar.contains(event.target) &&
-          menuButton &&
-          !menuButton.contains(event.target)) {
+        sidebar &&
+        !sidebar.contains(event.target) &&
+        menuButton &&
+        !menuButton.contains(event.target)) {
         setSidebarOpen(false);
       }
     };
@@ -80,8 +86,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     };
   }, [sidebarOpen]);
 
-  const handleLogout = () => {
-    console.log('Logout clicked');
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = async () => {
+    localStorage.setItem('logoutMessage', 'Logged out successfully');
+    await logout();
+    setShowLogoutConfirm(false);
+    navigate('/login');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
   };
 
   return (
@@ -95,9 +112,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
       <aside
         id="sidebar"
-        className={`fixed top-0 right-0 h-full w-72 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 h-full w-72 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         <button
           className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 hover:rotate-90 transform"
@@ -157,7 +173,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">
           <div className="p-4">
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="w-full flex items-center justify-center px-4 py-3 text-sm font-semibold text-white bg-red-700 rounded-lg hover:bg-red-800 hover:shadow-lg active:scale-95 transition-all duration-200 group"
             >
               <LogOut className="h-5 w-5 mr-2 transition-transform duration-200" />
@@ -166,6 +182,37 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
         </div>
       </aside>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all scale-100 opacity-100">
+            <div className="p-6 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <LogOut className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Sign Out?</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Are you sure you want to sign out of your account? You'll need to sign in again to access your dashboard.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelLogout}
+                  className="flex-1 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition-colors shadow-lg shadow-red-500/30"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
