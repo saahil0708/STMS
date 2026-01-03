@@ -1,5 +1,7 @@
-// StudentAttendancePage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import apiClient from '../../services/apiClient';
+import { useLogin } from '../../Context/LoginContext';
+import { ProfileSkeleton } from '../../Components/Global/SkeletonLoaders';
 import EnhancedStudentProfileHeader from '../../Components/Student/Attendance/ProfileHeader';
 import EnhancedAttendanceOverview from '../../Components/Student/Attendance/Overview';
 import EnhancedAttendanceCalendar from '../../Components/Student/Attendance/Calendar';
@@ -7,28 +9,55 @@ import EnhancedCourseAttendance from '../../Components/Student/Attendance/Attend
 import AttendanceInsights from '../../Components/Student/Attendance/Insights';
 
 const StudentAttendancePage = () => {
+  const { user } = useLogin();
   const [selectedMonth, setSelectedMonth] = useState('December 2023');
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [viewMode, setViewMode] = useState('calendar');
+  const [studentData, setStudentData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const studentData = {
-    name: 'Alex Johnson',
-    id: 'STU-2023-001',
-    program: 'Computer Science',
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      try {
+        // Fetch real student profile (cached in Redis for 600s in backend)
+        const response = await apiClient.get(`/api/students/student/${user.id || user._id}`);
+        setStudentData(response.data.data || response.data);
+      } catch (error) {
+        console.error('Failed to fetch student profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <ProfileSkeleton />
+      </div>
+    );
+  }
+
+  // Fallback if data fetch fails but we're not loading anymore
+  const activeStudentData = studentData || {
+    name: user?.name || 'Student',
+    id: user?.id || 'N/A',
+    program: 'Computer Science', // default fallbacks
     semester: '4th Semester',
-    email: 'alex.johnson@university.edu',
-    enrollmentDate: 'August 2023',
-    attendancePercentage: 87.5,
-    totalClasses: 84,
-    attendedClasses: 73,
-    missedClasses: 11
+    attendancePercentage: 0,
+    totalClasses: 0,
+    attendedClasses: 0,
+    missedClasses: 0
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Enhanced Header */}
-      <EnhancedStudentProfileHeader 
-        studentData={studentData}
+      <EnhancedStudentProfileHeader
+        studentData={activeStudentData}
         onBack={() => window.history.back()}
       />
 
@@ -38,8 +67,8 @@ const StudentAttendancePage = () => {
           {/* Left Column - Stats and Calendar */}
           <div className="lg:col-span-8 space-y-6">
             {/* Attendance Overview */}
-            <EnhancedAttendanceOverview 
-              studentData={studentData}
+            <EnhancedAttendanceOverview
+              studentData={activeStudentData}
               selectedMonth={selectedMonth}
               onMonthChange={setSelectedMonth}
               onViewModeChange={setViewMode}
@@ -47,7 +76,7 @@ const StudentAttendancePage = () => {
             />
 
             {/* Attendance Calendar/List */}
-            <EnhancedAttendanceCalendar 
+            <EnhancedAttendanceCalendar
               selectedMonth={selectedMonth}
               selectedCourse={selectedCourse}
               viewMode={viewMode}
@@ -57,7 +86,7 @@ const StudentAttendancePage = () => {
           {/* Right Column - Course Stats and Insights */}
           <div className="lg:col-span-4 space-y-6">
             {/* Course Performance */}
-            <EnhancedCourseAttendance 
+            <EnhancedCourseAttendance
               selectedCourse={selectedCourse}
               onCourseChange={setSelectedCourse}
             />

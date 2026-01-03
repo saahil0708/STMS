@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLogin } from '../../Context/LoginContext';
 import TopNav from '../../Components/Global/Top_Navbar';
 import Sidebar from '../../Components/Student/Sidebar';
 import TodayClass from '../../Components/Student/Home/TodayClass';
@@ -8,17 +9,18 @@ import RecentActivities from '../../Components/Student/Home/RecentActivities';
 import QuickActions from '../../Components/Student/Home/QuickActions';
 
 function Home() {
+  const { user } = useLogin();
   const hasClassesToday = true; // Change to false to test NoClassesToday component
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
+
       {/* Main Content */}
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, Alex Johnson
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 italic">
+            Welcome back, {user?.name || 'Student'}
           </h1>
           <p className="text-gray-600">
             Track your training progress and upcoming activities

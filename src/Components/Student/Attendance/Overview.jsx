@@ -25,7 +25,7 @@ const EnhancedAttendanceOverview = ({
   const stats = [
     {
       title: 'Present',
-      value: studentData.attendedClasses,
+      value: studentData?.attendedClasses || 0,
       icon: CheckCircleIcon,
       color: 'from-green-500 to-emerald-400',
       bgColor: 'bg-green-50',
@@ -33,7 +33,7 @@ const EnhancedAttendanceOverview = ({
     },
     {
       title: 'Absent',
-      value: studentData.missedClasses,
+      value: studentData?.missedClasses || 0,
       icon: XCircleIcon,
       color: 'from-red-500 to-pink-400',
       bgColor: 'bg-red-50',
@@ -41,7 +41,7 @@ const EnhancedAttendanceOverview = ({
     },
     {
       title: 'Total Classes',
-      value: studentData.totalClasses,
+      value: studentData?.totalClasses || 0,
       icon: CalendarIcon,
       color: 'from-blue-500 to-cyan-400',
       bgColor: 'bg-blue-50',
@@ -58,7 +58,7 @@ const EnhancedAttendanceOverview = ({
             <h3 className="text-xl font-bold text-gray-900">Attendance Overview</h3>
             <p className="text-gray-600 mt-1">Track your attendance performance</p>
           </div>
-          
+
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             {/* Month Selector */}
             <div className="relative">
@@ -99,7 +99,7 @@ const EnhancedAttendanceOverview = ({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Attendance Percentage Card */}
           <div className="md:col-span-1 bg-gradient-to-br from-red-600 to-red-500 rounded-xl p-6 text-white">
-            <div className="text-4xl font-bold mb-2">{studentData.attendancePercentage}%</div>
+            <div className="text-4xl font-bold mb-2">{studentData?.attendancePercentage || 0}%</div>
             <div className="text-sm opacity-90">Overall Attendance</div>
             <div className="mt-4 text-xs opacity-75">Target: 85%</div>
           </div>
@@ -128,16 +128,16 @@ const EnhancedAttendanceOverview = ({
         <div className="mt-8">
           <div className="flex justify-between text-sm text-gray-600 mb-3">
             <span>Attendance Progress</span>
-            <span className="font-semibold">{studentData.attendancePercentage}%</span>
+            <span className="font-semibold">{studentData?.attendancePercentage || 0}%</span>
           </div>
           <div className="relative">
             <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
+              <div
                 className="bg-gradient-to-r from-red-600 to-red-400 h-3 rounded-full"
-                style={{ width: `${studentData.attendancePercentage}%` }}
+                style={{ width: `${studentData?.attendancePercentage || 0}%` }}
               ></div>
             </div>
-            <div 
+            <div
               className="absolute top-0 h-3 w-0.5 bg-red-700"
               style={{ left: '85%' }}
             >

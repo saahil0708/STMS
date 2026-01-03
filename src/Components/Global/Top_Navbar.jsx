@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import logo from '../../assets/Logo.png';
 import {
   BellIcon,
   MagnifyingGlassIcon,
@@ -21,47 +22,37 @@ const TopNav = ({ sidebarOpen, setSidebarOpen }) => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
   return (
-    <header className={`sticky top-0 z-40 transition-all duration-300 ${
-      scrolled 
-        ? 'bg-white shadow-lg border-b border-gray-200' 
+    <header className={`sticky top-0 z-40 transition-all duration-300 ${scrolled
+        ? 'bg-white shadow-lg border-b border-gray-200'
         : 'bg-white border-b shadow-sm'
-    }`}>
+      }`}>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`flex items-center justify-between transition-all duration-300 ${
-          scrolled ? 'h-14' : 'h-16'
-        }`}>
+        <div className={`flex items-center justify-between transition-all duration-300 ${scrolled ? 'h-14' : 'h-16'
+          }`}>
           {/* Left Section */}
           <div className="flex items-center">
             {/* Logo */}
             <div className="flex items-center">
-              <div className={`bg-red-700 flex items-center justify-center mr-3 transition-all duration-300 ${
-                scrolled ? 'w-7 h-7 rounded-md' : 'w-8 h-8 rounded-lg'
-              }`}>
-                <span className="text-white font-bold transition-all duration-300" style={{
-                  fontSize: scrolled ? '0.875rem' : '0.875rem'
-                }}>
-                  TH
-                </span>
-              </div>
-              <span className={`font-bold text-gray-900 hidden md:block transition-all duration-300 ${
-                scrolled ? 'text-lg' : 'text-xl'
-              }`}>
-                TrainingHub
-              </span>
+              <img
+                src={logo}
+                alt="Logo"
+                className={`transition-all duration-300 object-contain ${scrolled ? 'h-8' : 'h-10'
+                  }`}
+              />
             </div>
           </div>
 
           {/* Right Section */}
           <div className="flex items-center space-x-4">
             {/* Menu Button */}
-            <button 
+            <button
               id="menu-button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="relative p-2 text-black hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-300"
