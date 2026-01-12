@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 
 const sampleHomeworks = [
-    { id: 1, title: 'Math - Algebra worksheet', subject: 'Mathematics', due: '2026-01-15', status: 'Pending' },
+    { id: 1, title: 'Math - Algebra', subject: 'Mathematics', due: '2026-01-15', status: 'Pending' },
     { id: 2, title: 'History - WW2 essay', subject: 'History', due: '2026-01-10', status: 'Submitted' },
     { id: 3, title: 'Physics - Lab report', subject: 'Physics', due: '2026-01-12', status: 'Overdue' },
     { id: 4, title: 'English - Reading summary', subject: 'English', due: '2026-01-20', status: 'Pending' },
