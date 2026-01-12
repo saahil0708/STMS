@@ -33,6 +33,7 @@ const StudentRoutes = createBrowserRouter([
                         element: <StudentAttendancePage />
                     },
                     {
+                        path: '/homework',
                         element: <HomeworkPage />
                     },
                     {
