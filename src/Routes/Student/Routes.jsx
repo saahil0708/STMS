@@ -9,6 +9,7 @@ import HomeworkStatus from '../../Pages/Student/HomeworkStatus';
 import Scores from '../../Pages/Student/Scores';
 import FeedbackForms from '../../Pages/Student/FeedbackForms';
 import Settings from '../../Pages/Student/Settings';
+import Chatbot from '../../Pages/Student/Chatbot';
 import LoginPage from '../../Auth/Login';
 
 const StudentRoutes = createBrowserRouter([
@@ -51,6 +52,10 @@ const StudentRoutes = createBrowserRouter([
                     {
                         path: '/settings',
                         element: <Settings />
+                    },
+                    {
+                        path: '/chatbot',
+                        element: <Chatbot />
                     }
                 ]
             }

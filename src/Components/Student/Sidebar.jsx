@@ -11,6 +11,7 @@ import {
   X,
   GraduationCap,
   ChevronRight,
+  Sparkles,
   LogOut
 } from 'lucide-react';
 import {
@@ -42,6 +43,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: 'Homework Status', icon: CheckCircleIcon, to: '/homework-status' },
     { name: 'Scores', icon: ChartBarIcon, to: '/scores' },
     { name: 'Feedback Forms', icon: ClipboardDocumentListIcon, to: '/feedback-forms' },
+    { name: 'AI Assistant', icon: Sparkles, to: '/chatbot' },
     { name: 'Settings', icon: Settings, to: '/settings' },
   ];
 
