@@ -39,7 +39,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: 'Dashboard', icon: Home, to: '/' },
     { name: 'Attendance History', icon: CalendarDaysIcon, to: '/attendance' },
     { name: 'Homework', icon: DocumentTextIcon, to: '/homework' },
-    { name: 'Homework Status', icon: CheckCircleIcon, to: '/homework/status' },
+    { name: 'Homework Status', icon: CheckCircleIcon, to: '/homework-status' },
     { name: 'Scores', icon: ChartBarIcon, to: '/scores' },
     { name: 'Feedback Forms', icon: ClipboardDocumentListIcon, to: '/feedback-forms' },
     { name: 'Settings', icon: Settings, to: '/settings' },
