@@ -1,5 +1,4 @@
-// EnhancedStudentProfileHeader.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import {
   UserCircleIcon,
   AcademicCapIcon,
@@ -10,8 +9,30 @@ import {
   IdentificationIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
+import { Snackbar, Alert } from '@mui/material';
 
 const EnhancedStudentProfileHeader = ({ studentData, onBack }) => {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const handleExport = () => {
+    // Determine the user's preferred greeting time
+    const hour = new Date().getHours();
+    let greeting = 'Good day';
+    if (hour < 12) greeting = 'Good morning';
+    else if (hour < 18) greeting = 'Good afternoon';
+    else greeting = 'Good evening';
+
+    setOpenSnackbar(true);
+    // Logic for actual export would go here
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
   return (
     <div className="bg-white border-b border-gray-200">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,12 +47,15 @@ const EnhancedStudentProfileHeader = ({ studentData, onBack }) => {
               <span className="font-medium">Back to Dashboard</span>
             </button>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-500">
               Last updated: Today, 10:30 AM
             </span>
-            <button className="flex items-center px-4 py-2 bg-red-700 text-white text-sm font-medium rounded-md hover:bg-red-800 transition-colors">
+            <button
+              onClick={handleExport}
+              className="flex items-center px-4 py-2 bg-red-700 text-white text-sm font-medium rounded-md hover:bg-red-800 transition-colors"
+            >
               <DownloadIcon className="h-4 w-4 mr-2" />
               Export Report
             </button>
@@ -49,7 +73,7 @@ const EnhancedStudentProfileHeader = ({ studentData, onBack }) => {
                 </div>
                 <div className="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-2 border-white shadow-sm"></div>
               </div>
-              
+
               <div className="ml-6">
                 <div className="flex items-center mb-2">
                   <h1 className="text-2xl font-bold text-gray-900 mr-3">{studentData.name}</h1>
@@ -57,12 +81,12 @@ const EnhancedStudentProfileHeader = ({ studentData, onBack }) => {
                     Active
                   </span>
                 </div>
-                
+
                 <div className="flex items-center text-gray-600 mb-4">
                   <IdentificationIcon className="h-4 w-4 mr-2" />
                   <span className="font-medium">{studentData.id}</span>
                 </div>
-                
+
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center text-gray-500">
                     <AcademicCapIcon className="h-4 w-4 mr-2" />
@@ -86,49 +110,46 @@ const EnhancedStudentProfileHeader = ({ studentData, onBack }) => {
                     <span className="ml-2 text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">+2.1%</span>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="text-sm text-gray-600 mb-1">Classes Attended</div>
                   <div className="text-2xl font-bold text-gray-900">{studentData.attendedClasses}</div>
                   <div className="text-xs text-gray-500 mt-1">of {studentData.totalClasses} total</div>
                 </div>
-                
+
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="text-sm text-gray-600 mb-1">Missed Classes</div>
                   <div className="text-2xl font-bold text-gray-900">{studentData.missedClasses}</div>
                   <div className="text-xs text-gray-500 mt-1">This semester</div>
                 </div>
-                
+
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="text-sm text-gray-600 mb-1">Current Courses</div>
                   <div className="text-2xl font-bold text-gray-900">4</div>
                   <div className="text-xs text-gray-500 mt-1">Active enrollments</div>
                 </div>
-                
+
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="text-sm text-gray-600 mb-1">Enrollment Date</div>
                   <div className="text-lg font-semibold text-gray-900">{studentData.enrollmentDate}</div>
                   <div className="text-xs text-gray-500 mt-1">Student since</div>
                 </div>
               </div>
-              
-              {/* Contact Info */}
-              {/* <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-gray-600">
-                    <EnvelopeIcon className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{studentData.email}</span>
-                  </div>
-                  <button className="flex items-center text-red-700 hover:text-red-800 text-sm font-medium">
-                    <span>View full profile</span>
-                    <ChevronRightIcon className="h-4 w-4 ml-1" />
-                  </button>
-                </div>
-              </div> */}
             </div>
           </div>
         </div>
       </div>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          Export process started successfully! Your report will be downloaded shortly.
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

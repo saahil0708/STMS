@@ -9,57 +9,46 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
-const HomeworkCalendar = ({ activeTab, filterCourse, dateRange }) => {
-  // Mock calendar data
-  const calendarDays = [
-    {
-      date: 'Dec 10',
-      day: 'Sunday',
-      assignments: [
-        { title: 'Cloud Architecture Analysis', course: 'CS403', dueTime: '11:59 PM', status: 'due-today' }
-      ]
-    },
-    {
-      date: 'Dec 11',
-      day: 'Monday',
-      assignments: [
-        { title: 'API Integration Project', course: 'CS401', dueTime: '5:00 PM', status: 'due-tomorrow' }
-      ]
-    },
-    {
-      date: 'Dec 12',
-      day: 'Tuesday',
-      assignments: [
-        { title: 'React Components Assignment', course: 'CS401', dueTime: '11:59 PM', status: 'upcoming' }
-      ]
-    },
-    {
-      date: 'Dec 13',
-      day: 'Wednesday',
-      assignments: []
-    },
-    {
-      date: 'Dec 14',
-      day: 'Thursday',
-      assignments: [
-        { title: 'Weekly Quiz', course: 'CS402', dueTime: '10:00 AM', status: 'upcoming' }
-      ]
-    },
-    {
-      date: 'Dec 15',
-      day: 'Friday',
-      assignments: [
-        { title: 'Database Schema Design', course: 'CS402', dueTime: '11:59 PM', status: 'upcoming' }
-      ]
-    },
-    {
-      date: 'Dec 16',
-      day: 'Saturday',
-      assignments: [
-        { title: 'UI Prototype Submission', course: 'CS404', dueTime: '3:00 PM', status: 'upcoming' }
-      ]
+const HomeworkCalendar = ({ activeTab, filterCourse, dateRange, assignments = [] }) => {
+  // Generate calendar days dynamically based on current week
+  const getCalendarDays = () => {
+    const days = [];
+    const today = new Date();
+    // Start from Sunday of current week
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(startOfWeek);
+      currentDate.setDate(startOfWeek.getDate() + i);
+
+      const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // "Dec 10"
+
+      // Filter assignments for this day
+      // Note: This is a simple string match, improved logic would compare date objects
+      const dayAssignments = assignments.filter(a => {
+        if (!a.dueDate) return false;
+        const d = new Date(a.dueDate);
+        return d.getDate() === currentDate.getDate() &&
+          d.getMonth() === currentDate.getMonth() &&
+          d.getFullYear() === currentDate.getFullYear();
+      }).map(a => ({
+        title: a.title,
+        course: a.courseId?.title || 'Unknown',
+        dueTime: new Date(a.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: a.status || 'upcoming'
+      }));
+
+      days.push({
+        date: dateStr,
+        day: currentDate.toLocaleDateString('en-US', { weekday: 'long' }),
+        assignments: dayAssignments
+      });
     }
-  ];
+    return days;
+  };
+
+  const calendarDays = getCalendarDays();
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -111,7 +100,7 @@ const HomeworkCalendar = ({ activeTab, filterCourse, dateRange }) => {
               <div className="space-y-3">
                 {day.assignments.length > 0 ? (
                   day.assignments.map((assignment, idx) => (
-                    <div 
+                    <div
                       key={idx}
                       className={`border rounded-lg p-3 ${getStatusColor(assignment.status)}`}
                     >

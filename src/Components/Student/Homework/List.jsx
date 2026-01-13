@@ -11,85 +11,23 @@ import {
   AcademicCapIcon
 } from '@heroicons/react/24/outline';
 
-const HomeworkList = ({ activeTab, filterCourse, dateRange }) => {
-  // Mock homework data
-  const homeworkData = [
-    {
-      id: 1,
-      title: 'React Components Assignment',
-      course: 'Advanced React Development',
-      courseCode: 'CS401',
-      dueDate: 'Tomorrow, 11:59 PM',
-      status: 'pending',
-      priority: 'high',
-      description: 'Create reusable components with props and state management',
-      attachments: 3,
-      points: 100,
-      submitted: false,
-      submittedDate: null,
-      grade: null
-    },
-    {
-      id: 2,
-      title: 'Database Schema Design',
-      course: 'Database Management Systems',
-      courseCode: 'CS402',
-      dueDate: 'Dec 15, 2023',
-      status: 'pending',
-      priority: 'medium',
-      description: 'Design normalized database schema for e-commerce platform',
-      attachments: 2,
-      points: 150,
-      submitted: false,
-      submittedDate: null,
-      grade: null
-    },
-    {
-      id: 3,
-      title: 'Cloud Architecture Analysis',
-      course: 'Cloud Computing Fundamentals',
-      courseCode: 'CS403',
-      dueDate: 'Dec 10, 2023',
-      status: 'submitted',
-      priority: 'low',
-      description: 'Analyze cloud architecture patterns and write report',
-      attachments: 1,
-      points: 120,
-      submitted: true,
-      submittedDate: 'Dec 8, 2023',
-      grade: null
-    },
-    {
-      id: 4,
-      title: 'UI Design Critique',
-      course: 'UI/UX Design Principles',
-      courseCode: 'CS404',
-      dueDate: 'Dec 5, 2023',
-      status: 'graded',
-      priority: 'low',
-      description: 'Critique existing UI designs and suggest improvements',
-      attachments: 0,
-      points: 80,
-      submitted: true,
-      submittedDate: 'Dec 4, 2023',
-      grade: 92
-    },
-    {
-      id: 5,
-      title: 'API Integration Project',
-      course: 'Advanced React Development',
-      courseCode: 'CS401',
-      dueDate: 'Today, 5:00 PM',
-      status: 'pending',
-      priority: 'high',
-      description: 'Integrate REST API with React application',
-      attachments: 4,
-      points: 200,
-      submitted: false,
-      submittedDate: null,
-      grade: null
-    }
-  ];
+const HomeworkList = ({ activeTab, filterCourse, dateRange, assignments = [] }) => {
+  // Normalize API data to match component structure
+  const homeworkData = assignments.map(a => ({
+    id: a._id || Math.random(),
+    title: a.title || 'Untitled Assignment',
+    course: a.courseId?.title || 'Unknown Course',
+    courseCode: 'N/A', // Not always available in simple API response
+    dueDate: a.dueDate ? new Date(a.dueDate).toLocaleDateString() : 'No Due Date',
+    status: a.status || 'pending',
+    priority: a.priority || 'medium',
+    description: a.description || 'No description provided',
+    attachments: a.attachments?.length || 0,
+    points: a.points || 100,
+    submitted: a.status === 'submitted' || a.status === 'graded',
+    submittedDate: a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : null,
+    grade: a.grade
+  }));
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -112,7 +50,7 @@ const HomeworkList = ({ activeTab, filterCourse, dateRange }) => {
   // Filter homework based on active tab and filters
   const filteredHomework = homeworkData.filter(item => {
     if (activeTab !== 'all' && item.status !== activeTab) return false;
-    if (filterCourse !== 'all' && item.courseCode !== filterCourse) return false;
+    if (filterCourse !== 'all' && item.course !== filterCourse && item.id !== filterCourse) return false; // Adjusted filter logic
     // Add date range filtering logic here
     return true;
   });
@@ -140,11 +78,10 @@ const HomeworkList = ({ activeTab, filterCourse, dateRange }) => {
               {/* Left Column - Homework Info */}
               <div className="lg:w-2/3 mb-4 lg:mb-0 lg:pr-8">
                 <div className="flex items-start mb-3">
-                  <div className={`p-2 rounded-lg mr-4 ${
-                    homework.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
-                    homework.status === 'submitted' ? 'bg-blue-50 text-blue-700' :
-                    'bg-green-50 text-green-700'
-                  }`}>
+                  <div className={`p-2 rounded-lg mr-4 ${homework.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
+                      homework.status === 'submitted' ? 'bg-blue-50 text-blue-700' :
+                        'bg-green-50 text-green-700'
+                    }`}>
                     <DocumentTextIcon className="h-5 w-5" />
                   </div>
                   <div className="flex-1">
@@ -159,16 +96,16 @@ const HomeworkList = ({ activeTab, filterCourse, dateRange }) => {
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center text-sm text-gray-600 mb-3">
                       <AcademicCapIcon className="h-4 w-4 mr-2" />
                       <span>{homework.course} ({homework.courseCode})</span>
                       <span className="mx-2">•</span>
                       <span>{homework.points} points</span>
                     </div>
-                    
+
                     <p className="text-sm text-gray-600 mb-4">{homework.description}</p>
-                    
+
                     <div className="flex items-center space-x-6">
                       <div className="flex items-center text-sm text-gray-600">
                         <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
@@ -176,7 +113,7 @@ const HomeworkList = ({ activeTab, filterCourse, dateRange }) => {
                           Due: {homework.dueDate}
                         </span>
                       </div>
-                      
+
                       {homework.attachments > 0 && (
                         <div className="flex items-center text-sm text-gray-600">
                           <PaperClipIcon className="h-4 w-4 mr-2 text-gray-400" />

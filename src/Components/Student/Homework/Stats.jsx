@@ -10,16 +10,20 @@ import {
 
 const HomeworkStats = ({ activeTab, onTabChange, studentData }) => {
   const tabs = [
-    { id: 'all', label: 'All Homework', count: studentData.totalAssignments, icon: DocumentIcon },
-    { id: 'pending', label: 'Pending', count: studentData.pendingAssignments, icon: ClockIcon },
-    { id: 'submitted', label: 'Submitted', count: studentData.submittedAssignments, icon: DocumentCheckIcon },
-    { id: 'graded', label: 'Graded', count: 28, icon: CheckCircleIcon }
+    { id: 'all', label: 'All Homework', count: studentData.totalAssignments || 0, icon: DocumentIcon },
+    { id: 'pending', label: 'Pending', count: studentData.pendingAssignments || 0, icon: ClockIcon },
+    { id: 'submitted', label: 'Submitted', count: studentData.submittedAssignments || 0, icon: DocumentCheckIcon },
+    { id: 'graded', label: 'Graded', count: studentData.gradedAssignments || 0, icon: CheckCircleIcon }
   ];
 
   const getTabColor = (tabId) => {
     if (activeTab === tabId) return 'bg-red-700 text-white';
     return 'bg-white text-gray-700 hover:bg-gray-50';
   };
+
+  const completionRate = studentData.totalAssignments > 0
+    ? Math.round((studentData.submittedAssignments / studentData.totalAssignments) * 100)
+    : 0;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -55,20 +59,20 @@ const HomeworkStats = ({ activeTab, onTabChange, studentData }) => {
             <h3 className="font-medium text-gray-900">Submission Progress</h3>
             <div className="flex items-center text-green-600 text-sm">
               <TrendingUpIcon className="h-4 w-4 mr-1" />
-              <span>81% completion rate</span>
+              <span>{completionRate}% completion rate</span>
             </div>
           </div>
-          
+
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-green-600 h-2 rounded-full"
-              style={{ width: `${(studentData.submittedAssignments / studentData.totalAssignments) * 100}%` }}
+              style={{ width: `${completionRate}%` }}
             ></div>
           </div>
-          
+
           <div className="flex justify-between text-xs text-gray-500 mt-2">
             <span>0 submitted</span>
-            <span>{studentData.submittedAssignments} of {studentData.totalAssignments} completed</span>
+            <span>{studentData.submittedAssignments || 0} of {studentData.totalAssignments || 0} completed</span>
             <span>All submitted</span>
           </div>
         </div>

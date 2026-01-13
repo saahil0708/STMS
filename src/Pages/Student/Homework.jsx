@@ -56,15 +56,17 @@ const HomeworkPage = () => {
         const pending = total - submitted;
 
         // Calculate Average Grade (only for graded ones)
-        const graded = assignmentList.filter(a => a.status === 'graded' && a.grade !== undefined);
-        const avg = graded.length > 0
-          ? graded.reduce((acc, curr) => acc + curr.grade, 0) / graded.length
+        const gradedCount = assignmentList.filter(a => a.status === 'graded').length;
+        const avg = gradedCount > 0
+          ? assignmentList.filter(a => a.status === 'graded' && a.grade !== undefined)
+            .reduce((acc, curr) => acc + curr.grade, 0) / gradedCount
           : 0;
 
         setStats({
           totalAssignments: total,
           pendingAssignments: pending,
           submittedAssignments: submitted,
+          gradedAssignments: gradedCount,
           averageGrade: Math.round(avg * 10) / 10 // Rounded to 1 decimal
         });
 
