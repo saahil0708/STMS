@@ -1,12 +1,22 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import TrainerHome from '../../Pages/Trainer/Home';
 import TrainerLayout from '../../Layout/Trainer/Layout';
 import LoginPage from '../../Auth/Login';
+import CreateCourse from '../../Pages/Trainer/CreateCourse';
+import TrainerMyCourses from '../../Pages/Trainer/MyCourses';
+import AddAssignment from '../../Pages/Trainer/AddAssignment';
+import ScheduleClass from '../../Pages/Trainer/ScheduleClass';
+import Grading from '../../Pages/Trainer/Grading';
+import TrainerSettings from '../../Pages/Trainer/Settings';
 
 const TrainerRoutes = createBrowserRouter([
     {
         path: '/login',
         element: <LoginPage />
+    },
+    {
+        path: '/',
+        element: <Navigate to="/trainer" replace />
     },
     {
         path: '/trainer',
@@ -17,24 +27,28 @@ const TrainerRoutes = createBrowserRouter([
                 element: <TrainerHome />
             },
             {
+                path: 'courses',
+                element: <TrainerMyCourses />
+            },
+            {
                 path: 'create-course',
-                element: <div>Create Course Page (Coming Soon)</div>
+                element: <CreateCourse />
             },
             {
                 path: 'add-assignment',
-                element: <div>Add Assignment Page (Coming Soon)</div>
+                element: <AddAssignment />
             },
             {
                 path: 'schedule-class',
-                element: <div>Schedule Class Page (Coming Soon)</div>
+                element: <ScheduleClass />
             },
             {
                 path: 'grading',
-                element: <div>Grading Page (Coming Soon)</div>
+                element: <Grading />
             },
             {
                 path: 'settings',
-                element: <div>Settings Page (Coming Soon)</div>
+                element: <TrainerSettings />
             }
         ]
     }

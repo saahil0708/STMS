@@ -21,6 +21,7 @@ const TrainerSidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
     const navigation = [
         { name: 'Dashboard', to: '/trainer', icon: Home },
+        { name: 'My Courses', to: '/trainer/courses', icon: BookOpen },
         { name: 'Create Course', to: '/trainer/create-course', icon: PlusCircle },
         { name: 'Add Assignment', to: '/trainer/add-assignment', icon: FileText },
         { name: 'Schedule Class', to: '/trainer/schedule-class', icon: Calendar },

@@ -17,34 +17,54 @@ const TodaysClasses = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLectures = async () => {
-      setLoading(true);
-      try {
-        const response = await apiClient.get('/api/lecture/today');
-        // Handle both direct array or wrapped data
-        const data = response.data.data || response.data;
-        setTodaysClasses(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Failed to fetch today\'s lectures:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchLectures();
   }, []);
 
-  const handleRefresh = async () => {
+  const fetchLectures = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/api/lecture/today');
-      const data = response.data.data || response.data;
-      setTodaysClasses(Array.isArray(data) ? data : []);
+      // Calculate local YYYY-MM-DD to handle timezone differences with server (e.g. UTC server vs Local user)
+      const localDate = new Date().toLocaleDateString('en-CA'); // 'en-CA' gives YYYY-MM-DD
+      const response = await apiClient.get(`/api/auth/lecture/today?date=${localDate}`);
+      const data = response.data.lectures || []; // Controller returns { lectures: [] }
+
+      const mapped = data.map(l => {
+        const startTime = new Date(l.timing);
+        const now = new Date();
+        const duration = l.duration || 60; // Default 60 mins if missing
+        const endTime = new Date(startTime.getTime() + duration * 60000);
+
+        let status = 'upcoming';
+        if (now >= startTime && now <= endTime) {
+          status = 'in-progress';
+        } else if (now > endTime) {
+          status = 'completed';
+        }
+
+        return {
+          id: l._id,
+          course: l.courseId?.title || 'Unknown Course',
+          instructor: l.courseId?.trainerId?.name || 'Your Trainer',
+          time: startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: status,
+          type: l.type || 'virtual', // Default for display
+          attendees: 'All',
+          isOnline: l.type === 'virtual',
+          roomId: l.roomId,
+          meetingLink: l.meetingLink
+        };
+      });
+
+      setTodaysClasses(mapped);
     } catch (error) {
-      console.error('Failed to refresh lectures:', error);
+      console.error('Failed to fetch today\'s lectures:', error);
     } finally {
-      setTimeout(() => setLoading(false), 500); // Small delay for visual feedback
+      setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    fetchLectures();
   };
 
   const getStatusColor = (status) => {
@@ -142,9 +162,26 @@ const TodaysClasses = () => {
                       </div>
                     </div>
                   </div>
-                  <button className="p-1.5 border border-gray-200 rounded-lg hover:bg-white hover:shadow-sm transition-all text-gray-400 hover:text-red-700 transform hover:scale-110 active:scale-95">
-                    <ChevronRightIcon className="h-4 w-4" />
-                  </button>
+                  <div className="flex flex-col items-end gap-2">
+                    {classItem.type === 'virtual' && classItem.status === 'in-progress' && (
+                      <a
+                        href={`/video-call/${classItem.roomId}`}
+                        className="px-3 py-1.5 bg-red-600 text-white text-xs font-bold uppercase rounded shadow hover:bg-red-700 transition-colors animate-pulse"
+                      >
+                        Join Live
+                      </a>
+                    )}
+
+                    {classItem.type === 'offline' && classItem.meetingLink && (
+                      <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded flex items-center">
+                        <span className="mr-1">📍</span> {classItem.meetingLink}
+                      </span>
+                    )}
+
+                    <button className="p-1.5 border border-gray-200 rounded-lg hover:bg-white hover:shadow-sm transition-all text-gray-400 hover:text-red-700 transform hover:scale-110 active:scale-95">
+                      <ChevronRightIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Middle row - Time and attendees */}

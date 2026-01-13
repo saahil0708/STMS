@@ -39,8 +39,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const navigation = [
     { name: 'Dashboard', to: '/', icon: Home },
+    { name: 'My Courses', to: '/courses', icon: BookOpen },
     { name: 'Attendance', to: '/attendance', icon: Calendar },
-    { name: 'Homework', to: '/homework', icon: BookOpen },
+    { name: 'Homework', to: '/homework', icon: DocumentTextIcon },
     { name: 'Scores', to: '/scores', icon: BarChart3 },
     { name: 'Feedback', to: '/feedback-forms', icon: FileText },
     { name: 'Settings', to: '/settings', icon: Settings },

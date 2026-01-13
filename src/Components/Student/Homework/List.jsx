@@ -11,7 +11,7 @@ import {
   AcademicCapIcon
 } from '@heroicons/react/24/outline';
 
-const HomeworkList = ({ activeTab, filterCourse, dateRange, assignments = [] }) => {
+const HomeworkList = ({ activeTab, filterCourse, dateRange, assignments = [], onSubmit }) => {
   // Normalize API data to match component structure
   const homeworkData = assignments.map(a => ({
     id: a._id || Math.random(),
@@ -79,8 +79,8 @@ const HomeworkList = ({ activeTab, filterCourse, dateRange, assignments = [] }) 
               <div className="lg:w-2/3 mb-4 lg:mb-0 lg:pr-8">
                 <div className="flex items-start mb-3">
                   <div className={`p-2 rounded-lg mr-4 ${homework.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
-                      homework.status === 'submitted' ? 'bg-blue-50 text-blue-700' :
-                        'bg-green-50 text-green-700'
+                    homework.status === 'submitted' ? 'bg-blue-50 text-blue-700' :
+                      'bg-green-50 text-green-700'
                     }`}>
                     <DocumentTextIcon className="h-5 w-5" />
                   </div>
@@ -160,7 +160,10 @@ const HomeworkList = ({ activeTab, filterCourse, dateRange, assignments = [] }) 
                   {/* Action Buttons */}
                   <div className="flex justify-end space-x-3">
                     {!homework.submitted ? (
-                      <button className="px-4 py-2 bg-red-700 text-white text-sm font-medium rounded-lg hover:bg-red-800">
+                      <button
+                        onClick={() => onSubmit(assignments.find(a => a._id === homework.id) || { ...homework, _id: homework.id })}
+                        className="px-4 py-2 bg-red-700 text-white text-sm font-medium rounded-lg hover:bg-red-800"
+                      >
                         Submit Now
                       </button>
                     ) : (

@@ -10,7 +10,7 @@ import QuickActions from '../../Components/Student/Home/QuickActions';
 
 function Home() {
   const { user } = useLogin();
-  const hasClassesToday = true; // Change to false to test NoClassesToday component
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -29,7 +29,7 @@ function Home() {
 
         {/* Stats Grid */}
         <div className="mb-8">
-          {hasClassesToday ? <TodayClass /> : <NoClassesToday />}
+          <TodayClass />
         </div>
 
         {/* Main Content Grid */}

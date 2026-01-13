@@ -23,31 +23,58 @@ const HomeworkPage = () => {
     averageGrade: 0
   });
 
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [submissionContent, setSubmissionContent] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const openSubmitModal = (assignment) => {
+    setSelectedAssignment(assignment);
+    setSubmissionContent('');
+    setIsSubmitModalOpen(true);
+  };
+
+  const handleSubmitAssignment = async (e) => {
+    e.preventDefault();
+    if (!selectedAssignment) return;
+    setSubmitting(true);
+    try {
+      await apiClient.post('/api/submission/submit', {
+        assignmentId: selectedAssignment._id,
+        content: { text: submissionContent } // Simple text submission for now
+      });
+      // Refresh data
+      window.location.reload();
+    } catch (err) {
+      console.error("Submission failed", err);
+      alert("Failed to submit assignment");
+    } finally {
+      setSubmitting(false);
+      setIsSubmitModalOpen(false);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch Assignments - trying likely endpoints based on other pages
         const res = await apiClient.get('/api/assignment/my-assignments');
-        const data = res.data.data || res.data; // Handle potential response wrapper
+        const data = res.data.data; // New wrapper { data: [...] }
 
         let assignmentList = Array.isArray(data) ? data : [];
         setAssignments(assignmentList);
 
         // Extract Unique Courses
-        const uniqueCourses = [];
         const courseMap = new Map();
-
         assignmentList.forEach(a => {
-          if (a.courseId && !courseMap.has(a.courseId._id)) {
-            courseMap.set(a.courseId._id, true);
-            uniqueCourses.push({
-              id: a.courseId._id,
-              name: a.courseId.title || 'Unknown Course'
-            });
+          if (a.courseId && typeof a.courseId === 'object') {
+            if (!courseMap.has(a.courseId._id)) {
+              courseMap.set(a.courseId._id, a.courseId.title);
+            }
           }
         });
 
+        const uniqueCourses = Array.from(courseMap.entries()).map(([id, title]) => ({ id, name: title }));
         setCourses([{ id: 'all', name: 'All Courses' }, ...uniqueCourses]);
 
         // Calculate Stats
@@ -55,19 +82,17 @@ const HomeworkPage = () => {
         const submitted = assignmentList.filter(a => a.status === 'submitted' || a.status === 'graded').length;
         const pending = total - submitted;
 
-        // Calculate Average Grade (only for graded ones)
-        const gradedCount = assignmentList.filter(a => a.status === 'graded').length;
-        const avg = gradedCount > 0
-          ? assignmentList.filter(a => a.status === 'graded' && a.grade !== undefined)
-            .reduce((acc, curr) => acc + curr.grade, 0) / gradedCount
+        // Calculate Average Grade
+        const graded = assignmentList.filter(a => a.status === 'graded' && a.grade != null);
+        const avg = graded.length > 0
+          ? graded.reduce((acc, curr) => acc + curr.grade, 0) / graded.length
           : 0;
 
         setStats({
           totalAssignments: total,
           pendingAssignments: pending,
           submittedAssignments: submitted,
-          gradedAssignments: gradedCount,
-          averageGrade: Math.round(avg * 10) / 10 // Rounded to 1 decimal
+          averageGrade: Math.round(avg * 10) / 10
         });
 
       } catch (error) {
@@ -131,6 +156,7 @@ const HomeworkPage = () => {
             filterCourse={filterCourse}
             dateRange={dateRange}
             assignments={assignments}
+            onSubmit={openSubmitModal}
           />
         ) : (
           <HomeworkCalendar
@@ -141,6 +167,49 @@ const HomeworkPage = () => {
           />
         )}
       </div>
+
+      {/* Submission Modal */}
+      {isSubmitModalOpen && selectedAssignment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl">
+            <h3 className="text-xl font-bold mb-4">Submit Assignment: {selectedAssignment.title}</h3>
+
+            <form onSubmit={handleSubmitAssignment}>
+              {selectedAssignment.type === 'form' ? (
+                <p className="text-gray-500 mb-4 italic">Form submission not fully supported in this quick view yet.</p>
+              ) : (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Work / Answer</label>
+                  <textarea
+                    className="w-full border rounded-lg p-3 h-32 focus:ring-red-500 focus:border-red-500"
+                    placeholder="Type your answer here..."
+                    value={submissionContent}
+                    onChange={e => setSubmissionContent(e.target.value)}
+                    required
+                  ></textarea>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsSubmitModalOpen(false)}
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                >
+                  {submitting ? 'Submitting...' : 'Submit Assignment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
