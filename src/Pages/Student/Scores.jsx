@@ -43,7 +43,7 @@ const Scores = () => {
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-red-600" />
             </div>
         );
     }
@@ -55,14 +55,20 @@ const Scores = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div className="text-sm text-gray-500">Average Score</div>
-                    <div className="text-3xl font-bold text-indigo-600">{average}%</div>
+                    <div className="text-3xl font-bold text-red-600">{average}%</div>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:col-span-2">
                     <div className="text-sm text-gray-500 mb-3">Recent Scores</div>
                     <div className="divide-y max-h-[400px] overflow-y-auto">
                         {scores.length === 0 ? (
-                            <p className="text-gray-400 py-4 text-center">No scores available yet.</p>
+                            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
+                                <div className="bg-gray-50 p-4 rounded-full mb-3">
+                                    <Loader2 className="h-6 w-6 text-gray-300" />
+                                </div>
+                                <p>No scores available yet.</p>
+                                <p className="text-sm mt-1 text-gray-300">Complete assignments to see your progress.</p>
+                            </div>
                         ) : (
                             scores.map((s) => {
                                 const pct = Math.round((s.score / s.max) * 100);
@@ -75,7 +81,7 @@ const Scores = () => {
                                             </div>
                                             <div className="w-48">
                                                 <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                                                    <div className="h-3 bg-indigo-600" style={{ width: `${pct}%` }} />
+                                                    <div className="h-3 bg-red-600" style={{ width: `${pct}%` }} />
                                                 </div>
                                                 <div className="text-sm text-gray-500 mt-1 text-right">{pct}%</div>
                                             </div>

@@ -1,5 +1,6 @@
-// HomeworkPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import apiClient from '../../services/apiClient';
+import { Loader2 } from 'lucide-react';
 import HomeworkHeader from '../../Components/Student/Homework/Header';
 import HomeworkStats from '../../Components/Student/Homework/Stats';
 import HomeworkFilters from '../../Components/Student/Homework/Filter';
@@ -12,28 +13,88 @@ const HomeworkPage = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
   const [dateRange, setDateRange] = useState('this-week');
 
-  // Mock data
-  const studentData = {
-    name: 'Alex Johnson',
-    id: 'STU-2023-001',
-    totalAssignments: 42,
-    pendingAssignments: 8,
-    submittedAssignments: 34,
-    averageGrade: 87.5
-  };
+  const [loading, setLoading] = useState(true);
+  const [assignments, setAssignments] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [stats, setStats] = useState({
+    totalAssignments: 0,
+    pendingAssignments: 0,
+    submittedAssignments: 0,
+    averageGrade: 0
+  });
 
-  const courses = [
-    { id: 'all', name: 'All Courses' },
-    { id: 'cs401', name: 'Advanced React Development' },
-    { id: 'cs402', name: 'Database Management Systems' },
-    { id: 'cs403', name: 'Cloud Computing Fundamentals' },
-    { id: 'cs404', name: 'UI/UX Design Principles' }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch Assignments - trying likely endpoints based on other pages
+        const res = await apiClient.get('/api/assignment/my-assignments');
+        const data = res.data.data || res.data; // Handle potential response wrapper
+
+        let assignmentList = Array.isArray(data) ? data : [];
+        setAssignments(assignmentList);
+
+        // Extract Unique Courses
+        const uniqueCourses = [];
+        const courseMap = new Map();
+
+        assignmentList.forEach(a => {
+          if (a.courseId && !courseMap.has(a.courseId._id)) {
+            courseMap.set(a.courseId._id, true);
+            uniqueCourses.push({
+              id: a.courseId._id,
+              name: a.courseId.title || 'Unknown Course'
+            });
+          }
+        });
+
+        setCourses([{ id: 'all', name: 'All Courses' }, ...uniqueCourses]);
+
+        // Calculate Stats
+        const total = assignmentList.length;
+        const submitted = assignmentList.filter(a => a.status === 'submitted' || a.status === 'graded').length;
+        const pending = total - submitted;
+
+        // Calculate Average Grade (only for graded ones)
+        const graded = assignmentList.filter(a => a.status === 'graded' && a.grade !== undefined);
+        const avg = graded.length > 0
+          ? graded.reduce((acc, curr) => acc + curr.grade, 0) / graded.length
+          : 0;
+
+        setStats({
+          totalAssignments: total,
+          pendingAssignments: pending,
+          submittedAssignments: submitted,
+          averageGrade: Math.round(avg * 10) / 10 // Rounded to 1 decimal
+        });
+
+      } catch (error) {
+        console.error("Error fetching homework:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    );
+  }
+
+  const studentData = {
+    name: 'My Dashboard', // Fallback or could fetch user info
+    ...stats
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <HomeworkHeader 
+      <HomeworkHeader
         studentData={studentData}
         onBack={() => window.history.back()}
       />
@@ -41,7 +102,7 @@ const HomeworkPage = () => {
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Statistics */}
         <div className="mb-6">
-          <HomeworkStats 
+          <HomeworkStats
             activeTab={activeTab}
             onTabChange={setActiveTab}
             studentData={studentData}
@@ -63,16 +124,18 @@ const HomeworkPage = () => {
 
         {/* Main Content */}
         {viewMode === 'list' ? (
-          <HomeworkList 
+          <HomeworkList
             activeTab={activeTab}
             filterCourse={filterCourse}
             dateRange={dateRange}
+            assignments={assignments}
           />
         ) : (
-          <HomeworkCalendar 
+          <HomeworkCalendar
             activeTab={activeTab}
             filterCourse={filterCourse}
             dateRange={dateRange}
+            assignments={assignments}
           />
         )}
       </div>

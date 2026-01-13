@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   PlusCircleIcon,
   DocumentArrowUpIcon,
@@ -24,7 +25,7 @@ const QuickActions = () => {
       description: 'Upload your work',
       icon: DocumentArrowUpIcon,
       color: 'bg-blue-50 text-blue-600',
-      action: '/assignments'
+      action: '/homework'
     },
     {
       title: 'Check Attendance',
@@ -38,7 +39,7 @@ const QuickActions = () => {
       description: 'Check your academic performance',
       icon: AcademicCapIcon,
       color: 'bg-purple-50 text-purple-600',
-      action: '/grades'
+      action: '/scores'
     },
     // {
     //   title: 'Save Resources',
@@ -62,16 +63,16 @@ const QuickActions = () => {
         <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
         <p className="text-sm text-gray-600 mt-1">Common tasks at your fingertips</p>
       </div>
-      
+
       <div className="p-6">
         <div className="grid grid-cols-2 gap-4">
           {actions.map((action, index) => {
             const Icon = action.icon;
             return (
-              <button
+              <Link
                 key={index}
+                to={action.action}
                 className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-[#991b1b] hover:shadow-sm transition-all duration-200 group"
-                onClick={() => console.log(`Navigating to ${action.action}`)}
               >
                 <div className={`p-3 rounded-full ${action.color} group-hover:scale-110 transition-transform duration-200`}>
                   <Icon className="h-6 w-6" />
@@ -82,11 +83,11 @@ const QuickActions = () => {
                 <span className="mt-1 text-xs text-gray-600 text-center">
                   {action.description}
                 </span>
-              </button>
+              </Link>
             );
           })}
         </div>
-        
+
         <div className="mt-6 pt-6 border-t border-gray-200">
           <div className="bg-red-50 border border-red-100 rounded-lg p-4">
             <h3 className="text-sm font-medium text-[#991b1b]">Upcoming Deadline</h3>

@@ -45,7 +45,13 @@ const Chatbot = () => {
             setMessages(prev => [...prev, { role: 'model', text: aiText }]);
         } catch (error) {
             console.error('Error fetching AI response:', error);
-            setMessages(prev => [...prev, { role: 'model', text: 'Sorry, I encountered an error. Please try again.', isError: true }]);
+            let errorMessage = 'Sorry, I encountered an error. Please try again.';
+
+            if (error.response && error.response.status === 429) {
+                errorMessage = 'You are sending messages too quickly. Please wait a moment before trying again.';
+            }
+
+            setMessages(prev => [...prev, { role: 'model', text: errorMessage, isError: true }]);
         } finally {
             setIsLoading(false);
         }
