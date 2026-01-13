@@ -7,6 +7,7 @@ import EnhancedAttendanceOverview from '../../Components/Student/Attendance/Over
 import EnhancedAttendanceCalendar from '../../Components/Student/Attendance/Calendar';
 import EnhancedCourseAttendance from '../../Components/Student/Attendance/AttendanceFilter';
 import AttendanceInsights from '../../Components/Student/Attendance/Insights';
+import AttendanceGraph from '../../Components/Student/Attendance/AttendanceGraph';
 
 const StudentAttendancePage = () => {
   const { user } = useLogin();
@@ -41,6 +42,7 @@ const StudentAttendancePage = () => {
             if (!acc[dateKey]) {
               acc[dateKey] = {
                 date: dateKey,
+                fullDate: record.date, // Store full date for sorting
                 day: dateObj.toLocaleDateString('en-US', { weekday: 'long' }), // Friday
                 weekday: dateObj.toLocaleDateString('en-US', { weekday: 'short' }), // Fri
                 status: 'good', // Default, will calculate
@@ -66,7 +68,7 @@ const StudentAttendancePage = () => {
             if (percentage === 100) dailyStatus = 'excellent';
             else if (percentage < 50) dailyStatus = 'poor';
 
-            return { ...day, status: dailyStatus };
+            return { ...day, status: dailyStatus, percentage: Math.round(percentage) };
           });
 
           // Sort by date descending (assuming new dates are better on top/first)
@@ -132,6 +134,11 @@ const StudentAttendancePage = () => {
               selectedCourse={selectedCourse}
               viewMode={viewMode}
               attendanceData={attendanceHistory} // Pass real data
+            />
+
+            {/* Attendance Graph */}
+            <AttendanceGraph
+              data={[...attendanceHistory].sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate))}
             />
           </div>
 

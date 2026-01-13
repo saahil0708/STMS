@@ -82,19 +82,24 @@ const EnhancedStudentProfileHeader = ({ studentData, onBack }) => {
                   </span>
                 </div>
 
-                <div className="flex items-center text-gray-600 mb-4">
-                  <IdentificationIcon className="h-4 w-4 mr-2" />
-                  <span className="font-medium">{studentData.id}</span>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center text-gray-500">
-                    <AcademicCapIcon className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{studentData.program}</span>
+                <div className="flex flex-col space-y-1.5 border-l-2 border-gray-200 pl-4 mt-2">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="w-24 font-medium text-gray-500">Roll No:</span>
+                    <span className="font-semibold text-gray-900">
+                      {studentData.rollNumber || studentData.rollNo || studentData.id || 'N/A'}
+                    </span>
                   </div>
-                  <div className="flex items-center text-gray-500">
-                    <CalendarIcon className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{studentData.semester}</span>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="w-24 font-medium text-gray-500">Degree:</span>
+                    <span className="font-semibold text-gray-900">
+                      {studentData.degree || studentData.program || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="w-24 font-medium text-gray-500">Date of Joining:</span>
+                    <span className="font-semibold text-gray-900">
+                      {studentData.joiningDate || studentData.enrollmentDate || (studentData.createdAt ? new Date(studentData.createdAt).toLocaleDateString() : 'N/A')}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -135,6 +140,20 @@ const EnhancedStudentProfileHeader = ({ studentData, onBack }) => {
                   <div className="text-xs text-gray-500 mt-1">Student since</div>
                 </div>
               </div>
+
+              {/* Contact Info */}
+              {/* <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-gray-600">
+                    <EnvelopeIcon className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{studentData.email}</span>
+                  </div>
+                  <button className="flex items-center text-red-700 hover:text-red-800 text-sm font-medium">
+                    <span>View full profile</span>
+                    <ChevronRightIcon className="h-4 w-4 ml-1" />
+                  </button>
+                </div>
+              </div> */}
             </div>
           </div>
         </div>

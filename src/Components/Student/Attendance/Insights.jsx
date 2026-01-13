@@ -75,36 +75,7 @@ const AttendanceInsights = () => {
           })}
         </div>
 
-        {/* Weekly Pattern */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="font-semibold text-gray-900">Weekly Pattern</h4>
-            <CalendarIcon className="h-4 w-4 text-gray-400" />
-          </div>
-          
-          <div className="space-y-3">
-            {patterns.map((pattern, index) => (
-              <div key={index} className="flex items-center">
-                <div className="w-20 text-sm text-gray-600">{pattern.day}</div>
-                <div className="flex-1">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        pattern.attendance >= 90 ? 'bg-green-500' :
-                        pattern.attendance >= 80 ? 'bg-yellow-500' :
-                        'bg-red-500'
-                      }`}
-                      style={{ width: `${pattern.attendance}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="w-12 text-right text-sm font-semibold text-gray-900">
-                  {pattern.attendance}%
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
 
         {/* Recommendation */}
         <div className="mt-6 pt-6 border-t border-gray-200">
