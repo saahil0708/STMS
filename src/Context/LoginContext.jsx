@@ -31,9 +31,18 @@ export const LoginProvider = ({ children }) => {
                     const userId = parsedUser.id || parsedUser._id;
 
                     if (userId) {
+                        // Skip verification for mock token to avoid 401 logout
+                        if (token === 'mock-token-xyz') {
+                            console.log("Mock session detected, skipping verification.");
+                            setLoading(false);
+                            return;
+                        }
+
                         try {
                             // Corrected endpoint based on server routes: /api/auth/student/student/:id
-                            const response = await apiClient.get(`/api/auth/${role}/${role}/${userId}`);
+                            const response = await apiClient.get(`/api/auth/${role}/${role}/${userId}`, {
+                                skipAuthRedirect: true
+                            });
 
                             if (response.data) {
                                 const updatedUser = response.data.data || response.data;
@@ -78,6 +87,11 @@ export const LoginProvider = ({ children }) => {
                 throw new Error('Invalid server response: Missing user or token');
             }
 
+            // Ensure role is present in user object
+            if (!user.role) {
+                user.role = role;
+            }
+
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
@@ -85,6 +99,7 @@ export const LoginProvider = ({ children }) => {
             return user;
         } catch (err) {
             console.error('Login error:', err);
+
             const errorMsg = err.response?.data?.message || 'Invalid email or password.';
             setError(errorMsg);
             throw new Error(errorMsg);

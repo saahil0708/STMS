@@ -20,7 +20,7 @@ const TodaysClasses = () => {
     const fetchLectures = async () => {
       setLoading(true);
       try {
-        const response = await apiClient.get('/api/auth/lecture/today');
+        const response = await apiClient.get('/api/lecture/today');
         // Handle both direct array or wrapped data
         const data = response.data.data || response.data;
         setTodaysClasses(Array.isArray(data) ? data : []);
@@ -37,7 +37,7 @@ const TodaysClasses = () => {
   const handleRefresh = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/api/auth/lecture/today');
+      const response = await apiClient.get('/api/lecture/today');
       const data = response.data.data || response.data;
       setTodaysClasses(Array.isArray(data) ? data : []);
     } catch (error) {

@@ -33,7 +33,7 @@ apiClient.interceptors.response.use(
             }
 
             // 401: Unauthorized (Possible token blacklisted in Redis)
-            if (error.response.status === 401) {
+            if (error.response.status === 401 && !error.config.skipAuthRedirect) {
                 console.error('Session expired or blacklisted in Redis');
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');

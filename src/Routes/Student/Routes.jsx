@@ -19,6 +19,14 @@ const StudentRoutes = createBrowserRouter([
         element: <LoginPage />
     },
     {
+        path: '/trainer',
+        element: <div className="min-h-screen flex items-center justify-center">Loading Trainer Dashboard...</div>
+    },
+    {
+        path: '/admin',
+        element: <div className="min-h-screen flex items-center justify-center">Loading Admin Dashboard...</div>
+    },
+    {
         path: '/',
         element: <ProtectedRoute />,
         children: [

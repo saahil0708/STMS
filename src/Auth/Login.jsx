@@ -206,16 +206,16 @@ const TrainIQLogin = () => {
       switch (role) {
         case 'student':
           console.log('Navigating to student dashboard');
-          navigate('/', { state: { message: 'Login Successful!', type: 'success' } });
+          window.location.href = '/';
           break;
         case 'trainer':
-          navigate('/trainer', { state: { message: 'Login Successful!', type: 'success' } });
+          window.location.href = '/trainer';
           break;
         case 'admin':
-          navigate('/admin', { state: { message: 'Login Successful!', type: 'success' } });
+          window.location.href = '/admin';
           break;
         default:
-          navigate('/', { state: { message: 'Login Successful!', type: 'success' } });
+          window.location.href = '/';
       }
     } catch (err) {
       console.error(err);
