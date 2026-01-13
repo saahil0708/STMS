@@ -14,13 +14,13 @@ import {
 
 const QuickActions = () => {
   const actions = [
-    {
-      title: 'View Timetable',
-      description: 'Check your schedule',
-      icon: CalendarDaysIcon,
-      color: 'bg-red-50 text-[#991b1b]',
-      action: '/courses'
-    },
+    // {
+    //   title: 'View Timetable',
+    //   description: 'Check your schedule',
+    //   icon: CalendarDaysIcon,
+    //   color: 'bg-red-50 text-[#991b1b]',
+    //   action: '/courses'
+    // },
     {
       title: 'Submit Assignment',
       description: 'Upload your work',
