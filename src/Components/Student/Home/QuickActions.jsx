@@ -8,7 +8,8 @@ import {
   BookmarkIcon,
   ShareIcon,
   ClipboardDocumentCheckIcon,
-  AcademicCapIcon
+  AcademicCapIcon,
+  VideoCameraIcon
 } from '@heroicons/react/24/outline';
 
 const QuickActions = () => {
@@ -40,6 +41,13 @@ const QuickActions = () => {
       icon: AcademicCapIcon,
       color: 'bg-purple-50 text-purple-600',
       action: '/scores'
+    },
+    {
+      title: 'Join Live Class',
+      description: 'Enter virtual classroom',
+      icon: VideoCameraIcon,
+      color: 'bg-indigo-50 text-indigo-600',
+      action: '/class/lecture-101'
     },
     // {
     //   title: 'Save Resources',

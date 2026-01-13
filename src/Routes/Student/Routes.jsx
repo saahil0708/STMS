@@ -11,6 +11,7 @@ import FeedbackForms from '../../Pages/Student/FeedbackForms';
 import Settings from '../../Pages/Student/Settings';
 import Chatbot from '../../Pages/Global/ChatBot';
 import LoginPage from '../../Auth/Login';
+import VirtualClass from '../../Pages/Student/VirtualClass';
 
 const StudentRoutes = createBrowserRouter([
     {
@@ -56,6 +57,10 @@ const StudentRoutes = createBrowserRouter([
                     {
                         path: '/chatbot',
                         element: <Chatbot />
+                    },
+                    {
+                        path: '/class/:roomId',
+                        element: <VirtualClass />
                     }
                 ]
             }
