@@ -28,12 +28,22 @@ export const LoginProvider = ({ children }) => {
                     setUser(parsedUser);
 
                     const role = parsedUser.role || 'student';
-                    const response = await apiClient.get(`/api/auth/${role}/profile`);
+                    const userId = parsedUser.id || parsedUser._id;
 
-                    if (response.data) {
-                        const updatedUser = response.data.data || response.data;
-                        setUser(updatedUser);
-                        localStorage.setItem('user', JSON.stringify(updatedUser));
+                    if (userId) {
+                        try {
+                            // Corrected endpoint based on server routes: /api/auth/student/student/:id
+                            const response = await apiClient.get(`/api/auth/${role}/${role}/${userId}`);
+
+                            if (response.data) {
+                                const updatedUser = response.data.data || response.data;
+                                setUser(updatedUser);
+                                localStorage.setItem('user', JSON.stringify(updatedUser)); // Update local storage with fresh data
+                            }
+                        } catch (err) {
+                            console.warn("Could not fetch fresh profile, using stored data", err);
+                            // If 404/401, apiClient might redirect, or we stay with storedUser
+                        }
                     }
                 } catch (error) {
                     console.error("Session verification failed:", error);

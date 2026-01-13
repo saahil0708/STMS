@@ -1,66 +1,15 @@
 // EnhancedAttendanceCalendar.jsx
 import React from 'react';
-import { 
-  CheckCircleIcon, 
-  XCircleIcon, 
+import {
+  CheckCircleIcon,
+  XCircleIcon,
   ClockIcon,
   ChevronLeftIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
-const EnhancedAttendanceCalendar = ({ selectedMonth, selectedCourse, viewMode }) => {
-  const attendanceData = [
-    {
-      date: 'Dec 1',
-      day: 'Friday',
-      weekday: 'Fri',
-      status: 'excellent',
-      classes: [
-        { course: 'Advanced React', time: '10:00 AM', status: 'present' },
-        { course: 'Database Systems', time: '2:00 PM', status: 'present' }
-      ]
-    },
-    {
-      date: 'Dec 4',
-      day: 'Monday',
-      weekday: 'Mon',
-      status: 'good',
-      classes: [
-        { course: 'Cloud Computing', time: '11:00 AM', status: 'present' },
-        { course: 'UI/UX Design', time: '3:00 PM', status: 'absent' }
-      ]
-    },
-    {
-      date: 'Dec 5',
-      day: 'Tuesday',
-      weekday: 'Tue',
-      status: 'excellent',
-      classes: [
-        { course: 'Advanced React', time: '10:00 AM', status: 'present' },
-        { course: 'Database Systems', time: '2:00 PM', status: 'present' }
-      ]
-    },
-    // {
-    //   date: 'Dec 6',
-    //   day: 'Wednesday',
-    //   weekday: 'Wed',
-    //   status: 'poor',
-    //   classes: [
-    //     { course: 'Cloud Computing', time: '11:00 AM', status: 'absent' },
-    //     { course: 'UI/UX Design', time: '3:00 PM', status: 'present' }
-    //   ]
-    // },
-    // {
-    //   date: 'Dec 7',
-    //   day: 'Thursday',
-    //   weekday: 'Thu',
-    //   status: 'excellent',
-    //   classes: [
-    //     { course: 'Advanced React', time: '10:00 AM', status: 'present' },
-    //     { course: 'Database Systems', time: '2:00 PM', status: 'present' }
-    //   ]
-    // }
-  ];
+const EnhancedAttendanceCalendar = ({ selectedMonth, selectedCourse, viewMode, attendanceData = [] }) => {
+  // Hardcoded data removed. Using props.
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -121,7 +70,7 @@ const EnhancedAttendanceCalendar = ({ selectedMonth, selectedCourse, viewMode })
                 <div className={`relative overflow-hidden flex flex-col h-full rounded-xl border border-gray-200 group-hover:border-red-300 transition-all duration-300 ${getClassStatusColor(day.classes.some(c => c.status === 'absent') ? 'absent' : 'present')}`}>
                   {/* Status Indicator */}
                   <div className={`absolute top-0 left-0 w-full h-1 ${getStatusColor(day.status)}`}></div>
-                  
+
                   <div className="p-4 flex-1 flex flex-col">
                     {/* Date Header */}
                     <div className="flex justify-between items-start mb-4">
@@ -144,16 +93,15 @@ const EnhancedAttendanceCalendar = ({ selectedMonth, selectedCourse, viewMode })
                           </div>
                           <div className="flex items-center flex-shrink-0 whitespace-nowrap ml-2">
                             {getClassStatusIcon(classItem.status)}
-                            <span className={`ml-2 text-xs font-medium ${
-                              classItem.status === 'present' ? 'text-green-600' :
-                              classItem.status === 'absent' ? 'text-red-600' :
-                              'text-yellow-600'
-                            }`}>
+                            <span className={`ml-2 text-xs font-medium ${classItem.status === 'present' ? 'text-green-600' :
+                                classItem.status === 'absent' ? 'text-red-600' :
+                                  'text-yellow-600'
+                              }`}>
                               {classItem.status.charAt(0).toUpperCase() + classItem.status.slice(1)}
                             </span>
                           </div>
                         </div>
-                      ))} 
+                      ))}
                     </div>
 
                     {/* Summary */}
@@ -180,7 +128,7 @@ const EnhancedAttendanceCalendar = ({ selectedMonth, selectedCourse, viewMode })
                     {day.status.charAt(0).toUpperCase() + day.status.slice(1)}
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   {day.classes.map((classItem, classIndex) => (
                     <div key={classIndex} className={`flex items-start sm:items-center justify-between gap-3 p-3 rounded-lg ${getClassStatusColor(classItem.status)}`}>
@@ -191,11 +139,10 @@ const EnhancedAttendanceCalendar = ({ selectedMonth, selectedCourse, viewMode })
                           <div className="text-sm text-gray-600 truncate">{classItem.time}</div>
                         </div>
                       </div>
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        classItem.status === 'present' ? 'bg-green-100 text-green-800' :
-                        classItem.status === 'absent' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      } whitespace-nowrap`}>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${classItem.status === 'present' ? 'bg-green-100 text-green-800' :
+                          classItem.status === 'absent' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                        } whitespace-nowrap`}>
                         {classItem.status.charAt(0).toUpperCase() + classItem.status.slice(1)}
                       </span>
                     </div>

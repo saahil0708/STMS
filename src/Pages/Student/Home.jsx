@@ -4,7 +4,7 @@ import TopNav from '../../Components/Global/Top_Navbar';
 import Sidebar from '../../Components/Student/Sidebar';
 import TodayClass from '../../Components/Student/Home/TodayClass';
 import NoClassesToday from '../../Components/Student/Home/NoClass';
-import CourseProgress from '../../Components/Student/Home/CourseProgress';
+import MyCourses from '../../Components/Student/Home/MyCourses';
 import RecentActivities from '../../Components/Student/Home/RecentActivities';
 import QuickActions from '../../Components/Student/Home/QuickActions';
 
@@ -36,7 +36,7 @@ function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-6">
-            <CourseProgress />
+            <MyCourses />
             <RecentActivities />
           </div>
 

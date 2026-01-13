@@ -14,23 +14,74 @@ const StudentAttendancePage = () => {
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [viewMode, setViewMode] = useState('calendar');
   const [studentData, setStudentData] = useState(null);
+  const [attendanceHistory, setAttendanceHistory] = useState([]); // New state for history
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       if (!user) return;
       try {
-        // Fetch real student profile (cached in Redis for 600s in backend)
-        const response = await apiClient.get(`/api/students/student/${user.id || user._id}`);
-        setStudentData(response.data.data || response.data);
+        setLoading(true);
+        // 1. Fetch real student profile
+        const profileRes = await apiClient.get(`/api/auth/student/student/${user.id || user._id}`);
+        setStudentData(profileRes.data.data || profileRes.data);
+
+        // 2. Fetch attendance history
+        const historyRes = await apiClient.get('/api/attendance/my-attendance');
+        const historyData = historyRes.data.data || historyRes.data; // Expecting array
+
+        if (Array.isArray(historyData)) {
+          // Transform and group by date
+          // Assuming historyData items have: { date, status, courseId: { title }, slot: { startTime } }
+          // We need to group them.
+          const grouped = historyData.reduce((acc, record) => {
+            const dateObj = new Date(record.date);
+            const dateKey = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Dec 1
+
+            if (!acc[dateKey]) {
+              acc[dateKey] = {
+                date: dateKey,
+                day: dateObj.toLocaleDateString('en-US', { weekday: 'long' }), // Friday
+                weekday: dateObj.toLocaleDateString('en-US', { weekday: 'short' }), // Fri
+                status: 'good', // Default, will calculate
+                classes: []
+              };
+            }
+
+            acc[dateKey].classes.push({
+              course: record.courseId?.title || 'Unknown Course',
+              time: record.slot?.startTime || 'N/A', // Assuming slot populated or just a time field
+              status: record.status // 'present', 'absent', etc.
+            });
+            return acc;
+          }, {});
+
+          // Calculate daily status based on classes
+          const processedHistory = Object.values(grouped).map(day => {
+            const presentCount = day.classes.filter(c => c.status === 'present').length;
+            const total = day.classes.length;
+            const percentage = total === 0 ? 0 : (presentCount / total) * 100;
+
+            let dailyStatus = 'good';
+            if (percentage === 100) dailyStatus = 'excellent';
+            else if (percentage < 50) dailyStatus = 'poor';
+
+            return { ...day, status: dailyStatus };
+          });
+
+          // Sort by date descending (assuming new dates are better on top/first)
+          // Ideally parse date again to sort
+          setAttendanceHistory(processedHistory);
+        }
+
       } catch (error) {
-        console.error('Failed to fetch student profile:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    fetchData();
   }, [user]);
 
   if (loading) {
@@ -80,6 +131,7 @@ const StudentAttendancePage = () => {
               selectedMonth={selectedMonth}
               selectedCourse={selectedCourse}
               viewMode={viewMode}
+              attendanceData={attendanceHistory} // Pass real data
             />
           </div>
 

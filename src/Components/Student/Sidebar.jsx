@@ -33,105 +33,51 @@ import axios from 'axios';
 // }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const { logout } = useLogin();
+  const { logout, user } = useLogin();
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   const navigation = [
-    { name: 'Dashboard', icon: Home, to: '/' },
-    { name: 'Attendance History', icon: CalendarDaysIcon, to: '/attendance' },
-    { name: 'Homework', icon: DocumentTextIcon, to: '/homework' },
-    { name: 'Homework Status', icon: CheckCircleIcon, to: '/homework-status' },
-    { name: 'Scores', icon: ChartBarIcon, to: '/scores' },
-    { name: 'Feedback Forms', icon: ClipboardDocumentListIcon, to: '/feedback-forms' },
-    { name: 'AI Assistant', icon: Sparkles, to: '/chatbot' },
-    { name: 'Settings', icon: Settings, to: '/settings' },
+    { name: 'Dashboard', to: '/', icon: Home },
+    { name: 'Attendance', to: '/attendance', icon: Calendar },
+    { name: 'Homework', to: '/homework', icon: BookOpen },
+    { name: 'Scores', to: '/scores', icon: BarChart3 },
+    { name: 'Feedback', to: '/feedback-forms', icon: FileText },
+    { name: 'Settings', to: '/settings', icon: Settings },
+    { name: 'AI Help', to: '/chatbot', icon: Sparkles },
   ];
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const sidebar = document.getElementById('sidebar');
-      const menuButton = document.getElementById('menu-button');
-
-      if (sidebarOpen &&
-        sidebar &&
-        !sidebar.contains(event.target) &&
-        menuButton &&
-        !menuButton.contains(event.target)) {
-        setSidebarOpen(false);
-      }
-    };
-
-    const handleEscapeKey = (event) => {
-      if (event.key === 'Escape' && sidebarOpen) {
-        setSidebarOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscapeKey);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [sidebarOpen, setSidebarOpen]);
-
-  useEffect(() => {
-    if (sidebarOpen && window.innerWidth < 1024) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [sidebarOpen]);
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
-  };
-
-  const confirmLogout = async () => {
-    localStorage.setItem('logoutMessage', 'Logged out successfully');
-    await logout();
-    setShowLogoutConfirm(false);
-    navigate('/login');
   };
 
   const cancelLogout = () => {
     setShowLogoutConfirm(false);
   };
 
+  const confirmLogout = async () => {
+    await logout();
+    setShowLogoutConfirm(false);
+  };
+
   return (
     <>
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <aside
-        id="sidebar"
-        className={`fixed top-0 right-0 h-full w-72 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-      >
-        <button
-          className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 hover:rotate-90 transform"
-          onClick={() => setSidebarOpen(false)}
-          aria-label="Close sidebar"
-        >
-          <X className="h-5 w-5" />
-        </button>
+      <aside className={`fixed inset-y-0 right-0 z-50 w-72 bg-white border-l border-gray-200 transform transition-transform duration-300 ease-in-out shadow-2xl ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="absolute top-4 right-4">
+          <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none">
+            <span className="sr-only">Close sidebar</span>
+            <X className="h-6 w-6" aria-hidden="true" />
+          </button>
+        </div>
 
         <div className="flex items-center p-6 border-b border-gray-100">
           <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-red-600 to-red-700 shadow-lg shadow-red-500/30 overflow-hidden">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Student" className="h-10 w-10" />
+            {/* Use dynamic seed based on user name or email for consistent avatar */}
+            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'Student'}`} alt="Student" className="h-10 w-10" />
           </div>
           <div className="ml-3">
-            <span className="text-lg font-bold text-gray-900">Alex Johnson</span>
-            <div className="text-xs text-gray-500 font-medium">Roll No: STU-2023-001</div>
+            <span className="text-lg font-bold text-gray-900">{user?.name || 'Student'}</span>
+            <div className="text-xs text-gray-500 font-medium">Roll No: {user?.rollNo || 'N/A'}</div>
           </div>
         </div>
 
@@ -183,38 +129,40 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             </button>
           </div>
         </div>
-      </aside>
+      </aside >
 
       {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all scale-100 opacity-100">
-            <div className="p-6 text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <LogOut className="h-6 w-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Sign Out?</h3>
-              <p className="text-sm text-gray-500 mb-6">
-                Are you sure you want to sign out of your account? You'll need to sign in again to access your dashboard.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={cancelLogout}
-                  className="flex-1 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmLogout}
-                  className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition-colors shadow-lg shadow-red-500/30"
-                >
-                  Sign Out
-                </button>
+      {
+        showLogoutConfirm && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all scale-100 opacity-100">
+              <div className="p-6 text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                  <LogOut className="h-6 w-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Sign Out?</h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Are you sure you want to sign out of your account? You'll need to sign in again to access your dashboard.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={cancelLogout}
+                    className="flex-1 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmLogout}
+                    className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition-colors shadow-lg shadow-red-500/30"
+                  >
+                    Sign Out
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </>
   );
 };
