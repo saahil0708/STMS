@@ -125,12 +125,14 @@ const AddAssignment = () => {
             title: formData.title,
             description: formData.description,
             dueDate: formData.dueDate,
-            maxScore: formData.totalMarks,
+            maxScore: parseInt(formData.totalMarks, 10), // Ensure number
             type: assignmentType,
             content: assignmentType === 'form'
                 ? { questions }
                 : { instructions: formData.description }
         };
+
+        console.log('Publishing Assignment Payload:', basePayload);
 
         try {
             // Iterate and publish to all selected courses
@@ -283,8 +285,8 @@ const AddAssignment = () => {
                                     type="button"
                                     onClick={() => setAssignmentType('task')}
                                     className={`flex items-center justify-center p-4 rounded-xl border-2 transition-all ${assignmentType === 'task'
-                                            ? 'border-red-500 bg-red-50 text-red-700'
-                                            : 'border-gray-200 hover:border-red-200 hover:bg-gray-50'
+                                        ? 'border-red-500 bg-red-50 text-red-700'
+                                        : 'border-gray-200 hover:border-red-200 hover:bg-gray-50'
                                         }`}
                                 >
                                     <DocumentTextIcon className="h-6 w-6 mr-2" />
@@ -297,8 +299,8 @@ const AddAssignment = () => {
                                     type="button"
                                     onClick={() => setAssignmentType('form')}
                                     className={`flex items-center justify-center p-4 rounded-xl border-2 transition-all ${assignmentType === 'form'
-                                            ? 'border-red-500 bg-red-50 text-red-700'
-                                            : 'border-gray-200 hover:border-red-200 hover:bg-gray-50'
+                                        ? 'border-red-500 bg-red-50 text-red-700'
+                                        : 'border-gray-200 hover:border-red-200 hover:bg-gray-50'
                                         }`}
                                 >
                                     <ListBulletIcon className="h-6 w-6 mr-2" />
