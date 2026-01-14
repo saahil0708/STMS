@@ -6,6 +6,13 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 export default defineConfig({
   plugins: [
     react(),
-    nodePolyfills(),
+    nodePolyfills({
+      include: ['events', 'util', 'stream', 'buffer', 'process'],
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+    }),
   ],
 })

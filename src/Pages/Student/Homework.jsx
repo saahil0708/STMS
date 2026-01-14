@@ -6,6 +6,7 @@ import HomeworkStats from '../../Components/Student/Homework/Stats';
 import HomeworkFilters from '../../Components/Student/Homework/Filter';
 import HomeworkList from '../../Components/Student/Homework/List';
 import HomeworkCalendar from '../../Components/Student/Homework/Calendar';
+import AssignmentForm from '../../Components/Student/Homework/AssignmentForm';
 
 const HomeworkPage = () => {
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'pending', 'submitted', 'graded'
@@ -26,22 +27,65 @@ const HomeworkPage = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [submissionContent, setSubmissionContent] = useState('');
+  const [formAnswers, setFormAnswers] = useState({}); // { questionId: answerText }
   const [submitting, setSubmitting] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
-  const openSubmitModal = (assignment) => {
+  const openSubmitModal = async (assignment) => {
     setSelectedAssignment(assignment);
     setSubmissionContent('');
+    setFormAnswers({});
     setIsSubmitModalOpen(true);
+    setLoadingDetails(true);
+
+    try {
+      const res = await apiClient.get(`/api/assignment/${assignment._id}`);
+      // Support both single object return or wrapped in { data: ... }
+      const fullAssignment = res.data.data || res.data;
+      setSelectedAssignment(fullAssignment);
+    } catch (err) {
+      console.error("Failed to fetch assignment details", err);
+      // Fallback to what we have or show error? 
+      // For now, we stick with the list data but maybe show a toast
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleFormAnswerChange = (questionId, value) => {
+    setFormAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
   };
 
   const handleSubmitAssignment = async (e) => {
     e.preventDefault();
     if (!selectedAssignment) return;
     setSubmitting(true);
+
+    let contentPayload;
+
+    if (selectedAssignment.type === 'form') {
+      const questions = selectedAssignment.content?.questions || [];
+      // Format answers as array of objects: { questionId, answer }
+      // Or simply pass the answers object if backend supports it.
+      // Based on typical patterns, let's send an array with question text context too if needed,
+      // but usually just ID and Answer is enough.
+      contentPayload = {
+        answers: Object.keys(formAnswers).map(qId => ({
+          questionId: qId,
+          answer: formAnswers[qId]
+        }))
+      };
+    } else {
+      contentPayload = { text: submissionContent };
+    }
+
     try {
       await apiClient.post('/api/submission/submit', {
         assignmentId: selectedAssignment._id,
-        content: { text: submissionContent } // Simple text submission for now
+        content: contentPayload
       });
       // Refresh data
       window.location.reload();
@@ -171,42 +215,55 @@ const HomeworkPage = () => {
       {/* Submission Modal */}
       {isSubmitModalOpen && selectedAssignment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl">
-            <h3 className="text-xl font-bold mb-4">Submit Assignment: {selectedAssignment.title}</h3>
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-2">Submit: {selectedAssignment.title}</h3>
+            <p className="text-sm text-gray-500 mb-6 border-b pb-4">
+              {selectedAssignment.description}
+            </p>
 
-            <form onSubmit={handleSubmitAssignment}>
-              {selectedAssignment.type === 'form' ? (
-                <p className="text-gray-500 mb-4 italic">Form submission not fully supported in this quick view yet.</p>
-              ) : (
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Work / Answer</label>
-                  <textarea
-                    className="w-full border rounded-lg p-3 h-32 focus:ring-red-500 focus:border-red-500"
-                    placeholder="Type your answer here..."
-                    value={submissionContent}
-                    onChange={e => setSubmissionContent(e.target.value)}
-                    required
-                  ></textarea>
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsSubmitModalOpen(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-                >
-                  {submitting ? 'Submitting...' : 'Submit Assignment'}
-                </button>
+            {loadingDetails ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-red-600" />
               </div>
-            </form>
+            ) : (
+              <form onSubmit={handleSubmitAssignment}>
+                {selectedAssignment.type === 'form' ? (
+                  <AssignmentForm
+                    questions={selectedAssignment.content?.questions || []}
+                    answers={formAnswers}
+                    onAnswerChange={handleFormAnswerChange}
+                  />
+                ) : (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Work / Answer</label>
+                    <textarea
+                      className="w-full border rounded-lg p-3 h-32 focus:ring-red-500 focus:border-red-500"
+                      placeholder="Type your answer here..."
+                      value={submissionContent}
+                      onChange={e => setSubmissionContent(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-3 mt-8 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setIsSubmitModalOpen(false)}
+                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-6 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Assignment'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
