@@ -23,7 +23,7 @@ const HomeworkList = ({ activeTab, filterCourse, dateRange, assignments = [], on
     priority: a.priority || 'medium',
     description: a.description || 'No description provided',
     attachments: a.attachments?.length || 0,
-    points: a.points || 100,
+    points: a.maxScore || a.points || 100,
     submitted: a.status === 'submitted' || a.status === 'graded',
     submittedDate: a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : null,
     grade: a.grade
@@ -129,10 +129,13 @@ const HomeworkList = ({ activeTab, filterCourse, dateRange, assignments = [], on
               <div className="lg:w-1/3">
                 <div className="flex flex-col space-y-4">
                   {/* Grade/Status Display */}
-                  {homework.grade ? (
+                  {homework.grade != null ? (
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-green-700">{homework.grade}%</div>
-                      <div className="text-sm text-gray-600">Grade Received</div>
+                      <div className="text-2xl font-bold text-green-700">
+                        {Math.round((homework.grade / homework.points) * 100)}%
+                      </div>
+                      <div className="text-sm font-medium text-gray-800">{homework.grade} / {homework.points}</div>
+                      <div className="text-xs text-gray-500">Grade Received</div>
                     </div>
                   ) : homework.submitted ? (
                     <div className="text-right">

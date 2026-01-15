@@ -241,7 +241,7 @@ const ScheduleClass = () => {
                         </div>
 
                         {/* Location / Meeting Link */}
-                        {formData.type === 'offline' && (
+                        {formData.type === 'offline' ? (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Location / Classroom</label>
                                 <div className="relative">
@@ -255,6 +255,17 @@ const ScheduleClass = () => {
                                         placeholder="e.g., Room 304, Building A"
                                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition-colors"
                                     />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start">
+                                <VideoCameraIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                                <div>
+                                    <h4 className="text-sm font-medium text-blue-900">Automatic Room Generation</h4>
+                                    <p className="text-sm text-blue-700 mt-1">
+                                        A secure video calling room ID will be automatically generated for this class.
+                                        You and your students will see a "Join Class" button on the dashboard at the scheduled time.
+                                    </p>
                                 </div>
                             </div>
                         )}

@@ -192,8 +192,8 @@ const Settings = () => {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-3 w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors ${activeTab === tab.id
-                                            ? 'bg-red-50 text-red-700 border border-red-100'
-                                            : 'text-gray-700 hover:bg-gray-50'
+                                        ? 'bg-red-50 text-red-700 border border-red-100'
+                                        : 'text-gray-700 hover:bg-gray-50'
                                         }`}
                                 >
                                     {tab.icon}
@@ -217,8 +217,8 @@ const Settings = () => {
                 <div className="lg:w-3/4">
                     {message.text && (
                         <div className={`mb-6 p-4 rounded-lg ${message.type === 'success'
-                                ? 'bg-red-50 text-red-800 border border-red-200'
-                                : 'bg-red-50 text-red-800 border border-red-200'
+                            ? 'bg-red-50 text-red-800 border border-red-200'
+                            : 'bg-red-50 text-red-800 border border-red-200'
                             }`}>
                             {message.text}
                         </div>
@@ -529,14 +529,14 @@ const Settings = () => {
                                                 key={themeOption.id}
                                                 onClick={() => setTheme(themeOption.id)}
                                                 className={`p-4 border rounded-lg text-left transition ${theme === themeOption.id
-                                                        ? 'border-red-500 bg-red-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-red-500 bg-red-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-8 h-8 rounded-full ${themeOption.id === 'light' ? 'bg-gray-200' :
-                                                            themeOption.id === 'dark' ? 'bg-gray-800' :
-                                                                'bg-gradient-to-r from-gray-200 to-gray-800'
+                                                        themeOption.id === 'dark' ? 'bg-gray-800' :
+                                                            'bg-gradient-to-r from-gray-200 to-gray-800'
                                                         }`} />
                                                     <div>
                                                         <p className="font-medium text-gray-900">{themeOption.label}</p>

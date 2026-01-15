@@ -8,6 +8,8 @@ import AddAssignment from '../../Pages/Trainer/AddAssignment';
 import ScheduleClass from '../../Pages/Trainer/ScheduleClass';
 import Grading from '../../Pages/Trainer/Grading';
 import TrainerSettings from '../../Pages/Trainer/Settings';
+import VirtualClass from '../../Pages/Student/VirtualClass'; // Reusing the same component
+import OfflineAttendance from '../../pages/Trainer/OfflineAttendance';
 
 const TrainerRoutes = createBrowserRouter([
     {
@@ -49,8 +51,17 @@ const TrainerRoutes = createBrowserRouter([
             {
                 path: 'settings',
                 element: <TrainerSettings />
-            }
-        ]
+            },
+
+            {
+        path: 'class/:roomId',
+        element: <VirtualClass />
+    },
+    {
+        path: 'attendance',
+        element: <OfflineAttendance />
+    }
+]
     }
 ]);
 
