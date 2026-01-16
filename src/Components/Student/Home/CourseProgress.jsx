@@ -46,117 +46,100 @@ const CourseProgress = () => {
   ];
 
   return (
-    <div className="card border-0 shadow-sm h-auto pt-2">
-      <div className="card-header bg-white border-0">
-        <div className="d-flex justify-content-between align-items-center">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-auto">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex justify-between items-center">
           <div>
-            <h5 className="card-title mb-1 fw-bold text-dark">My Courses</h5>
-            {/* <p className="text-muted mb-0">Track your enrolled courses</p> */}
+            <h5 className="text-lg font-bold text-gray-900">My Courses</h5>
+            {/* <p className="text-gray-500 text-sm">Track your enrolled courses</p> */}
           </div>
-          <button className="btn btn-sm btn-outline-danger">
+          <button className="px-3 py-1.5 text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors">
             View All
           </button>
         </div>
       </div>
-      
-      <div className="card-body p-0">
-        <div className="list-group list-group-flush">
-          {courses.map((course, index) => (
-            <React.Fragment key={course.id}>
-              <div className="list-group-item border-0 px-4 py-3">
-                <div className="row align-items-center">
-                  {/* Course Info */}
-                  <div className="col-lg-5 mb-3 mb-lg-0">
-                    <div className="d-flex align-items-start">
-                      <div className="bg-danger-subtle p-2 rounded-circle me-3">
-                        <BookOpenIcon className="h-5 w-5 text-danger" />
-                      </div>
-                      <div>
-                        <h6 className="fw-semibold mb-1 text-dark">{course.name}</h6>
-                        <div className="d-flex align-items-center text-muted small">
-                          <UserCircleIcon className="h-4 w-4 me-1" />
-                          <span>{course.instructor}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Duration and Credits */}
-                  <div className="col-lg-3 mb-3 mb-lg-0">
-                    <div className="d-flex flex-column">
-                      <div className="d-flex align-items-center mb-1">
-                        <ClockIcon className="h-4 w-4 text-muted me-2" />
-                        <span className="text-dark">{course.duration}</span>
+      <div className="p-0">
+        <div className="divide-y divide-gray-100">
+          {courses.map((course) => (
+            <div key={course.id} className="p-5 hover:bg-gray-50 transition-colors">
+              <div className="flex flex-wrap items-center -mx-4">
+                {/* Course Info */}
+                <div className="w-full lg:w-5/12 px-4 mb-4 lg:mb-0">
+                  <div className="flex items-start">
+                    <div className="bg-red-50 p-2.5 rounded-full mr-4 shrink-0">
+                      <BookOpenIcon className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <h6 className="font-bold text-gray-900 mb-1">{course.name}</h6>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <UserCircleIcon className="h-4 w-4 mr-1.5" />
+                        <span>{course.instructor}</span>
                       </div>
-                      <small className="text-muted">{course.creditHours} credit hours</small>
-                    </div>
-                  </div>
-
-                  {/* Dates */}
-                  <div className="col-lg-3 mb-3 mb-lg-0">
-                    <div className="d-flex flex-column">
-                      <small className="text-muted d-flex align-items-center mb-1">
-                        <CalendarIcon className="h-3 w-3 me-1" />
-                        {course.startDate}
-                      </small>
-                      <small className="text-muted d-flex align-items-center">
-                        <CalendarIcon className="h-3 w-3 me-1" />
-                        {course.endDate}
-                      </small>
-                    </div>
-                  </div>
-
-                  {/* Action */}
-                  <div className="col-lg-1 text-lg-end">
-                    <div className="d-flex align-items-center justify-content-between">
-                      {course.nextDeadline !== 'Completed' && (
-                        <span className="badge bg-danger-subtle text-danger d-lg-none">
-                          Due Soon
-                        </span>
-                      )}
-                      <button className="btn btn-sm btn-outline-secondary">
-                        <ArrowRightIcon className="h-4 w-4" />
-                      </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Deadline info for mobile */}
-                {course.nextDeadline !== 'Completed' && (
-                  <div className="row mt-3 d-lg-none">
-                    <div className="col-12">
-                      <div className="alert alert-danger py-2 mb-0">
-                        <small className="d-flex align-items-center">
-                          <CalendarIcon className="h-3 w-3 me-2" />
-                          Next deadline: {course.nextDeadline}
-                        </small>
-                      </div>
+                {/* Duration and Credits */}
+                <div className="w-full sm:w-1/2 lg:w-3/12 px-4 mb-4 lg:mb-0">
+                  <div className="flex flex-col">
+                    <div className="flex items-center mb-1 text-sm text-gray-900">
+                      <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
+                      <span>{course.duration}</span>
                     </div>
+                    <small className="text-gray-500 ml-6 text-xs">{course.creditHours} credit hours</small>
                   </div>
-                )}
+                </div>
+
+                {/* Dates */}
+                <div className="w-full sm:w-1/2 lg:w-3/12 px-4 mb-4 lg:mb-0">
+                  <div className="flex flex-col space-y-1">
+                    <small className="text-gray-500 flex items-center text-xs">
+                      <CalendarIcon className="h-3.5 w-3.5 mr-1.5 opacity-70" />
+                      Start: {course.startDate}
+                    </small>
+                    <small className="text-gray-500 flex items-center text-xs">
+                      <CalendarIcon className="h-3.5 w-3.5 mr-1.5 opacity-70" />
+                      End: {course.endDate}
+                    </small>
+                  </div>
+                </div>
+
+                {/* Action */}
+                <div className="w-full lg:w-1/12 px-4 text-right flex lg:block justify-between items-center">
+                  {course.nextDeadline !== 'Completed' && (
+                    <span className="lg:hidden px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-semibold">
+                      Due Soon
+                    </span>
+                  )}
+                  <button className="p-2 text-gray-400 border border-gray-200 rounded-lg hover:text-red-600 hover:bg-white hover:border-red-200 transition-all shadow-sm">
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-              
-              {/* Separator */}
-              {index < courses.length - 1 && (
-                <div className="px-4">
-                  <hr className="my-0" />
+
+              {/* Deadline info for mobile */}
+              {course.nextDeadline !== 'Completed' && (
+                <div className="mt-4 lg:hidden">
+                  <div className="bg-red-50 text-red-800 p-3 rounded-lg text-sm flex items-center">
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    <span className="font-semibold">Next deadline: {course.nextDeadline}</span>
+                  </div>
                 </div>
               )}
-            </React.Fragment>
+            </div>
           ))}
         </div>
 
         {/* Footer with Actions */}
-        <div className="p-4 border-top">
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <div className="mb-3 mb-md-0">
-              <small className="text-muted">
-                Showing {courses.length} of 8 courses • 
-                <span className="text-success ms-2">4 active</span>
-              </small>
+        <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl leading-none">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-xs text-gray-500">
+              Showing <span className="font-medium text-gray-900">{courses.length}</span> of 8 courses •
+              <span className="text-green-600 font-medium ml-2">4 active</span>
             </div>
-            <div className="d-flex gap-2">
-              <button className="btn btn-danger p-2 px-3 btn-sm">
+            <div className="flex gap-2">
+              <button className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 shadow-sm transition-colors">
                 Download Schedule
               </button>
             </div>

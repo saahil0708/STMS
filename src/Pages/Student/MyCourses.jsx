@@ -50,16 +50,26 @@ const StudentMyCourses = () => {
                         </p>
                     </div>
 
-                    {/* Search */}
-                    <div className="relative">
-                        <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
-                        <input
-                            type="text"
-                            placeholder="Search courses..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 w-full md:w-64 transition-all"
-                        />
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        {/* Join Course Button */}
+                        <Link
+                            to="/enroll"
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
+                        >
+                            <span className="mr-2 text-lg">+</span> Join Course
+                        </Link>
+
+                        {/* Search */}
+                        <div className="relative">
+                            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
+                            <input
+                                type="text"
+                                placeholder="Search courses..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 w-full sm:w-64 transition-all"
+                            />
+                        </div>
                     </div>
                 </div>
 
