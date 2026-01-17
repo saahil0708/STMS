@@ -12,6 +12,9 @@ import Reports from '../../pages/Admin/Reports';
 import AdminResults from '../../pages/Admin/Results';
 import AdminFeedback from '../../pages/Admin/Feedback';
 import AdminAttendance from '../../pages/Admin/Attendance';
+import Chatbot from '../../Pages/Global/ChatBot';
+import StudentDetails from '../../Pages/Global/StudentDetails';
+import TrainerDetails from '../../Pages/Admin/TrainerDetails';
 
 const AdminRoutes = createBrowserRouter([
     {
@@ -43,6 +46,10 @@ const AdminRoutes = createBrowserRouter([
                 element: <Users />
             },
             {
+                path: 'student/:id',
+                element: <StudentDetails />
+            },
+            {
                 path: 'system',
                 element: <SystemHealth />
             },
@@ -61,6 +68,10 @@ const AdminRoutes = createBrowserRouter([
             {
                 path: 'attendance',
                 element: <AdminAttendance />
+            },
+            {
+                path: 'chatbot',
+                element: <Chatbot />
             },
             {
                 path: 'settings',

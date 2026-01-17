@@ -81,7 +81,7 @@ const OfflineAttendance = () => {
                 status: attendanceMap[s._id]
             }));
 
-            await apiClient.post('/api/auth/trainer/attendance/offline', {
+            await apiClient.post('/api/attendance/offline', {
                 courseId: selectedCourse,
                 date,
                 students: studentList
@@ -153,8 +153,8 @@ const OfflineAttendance = () => {
                                             <button
                                                 onClick={() => toggleAttendance(student._id)}
                                                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${attendanceMap[student._id] === 'present'
-                                                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                        : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                    : 'bg-red-100 text-red-700 hover:bg-red-200'
                                                     }`}
                                             >
                                                 {attendanceMap[student._id] === 'present' ? 'Present' : 'Absent'}

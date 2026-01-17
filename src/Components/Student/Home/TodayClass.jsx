@@ -35,10 +35,12 @@ const TodaysClasses = () => {
         const endTime = new Date(startTime.getTime() + duration * 60000);
 
         let status = 'upcoming';
-        if (now >= startTime && now <= endTime) {
+        // User Requirement: Class should not end automatically effectively allowing overtime.
+        // We treat any class that has started today as 'in-progress' for the entire day.
+        if (now >= startTime) {
           status = 'in-progress';
-        } else if (now > endTime) {
-          status = 'completed';
+        } else {
+          status = 'upcoming';
         }
 
         return {

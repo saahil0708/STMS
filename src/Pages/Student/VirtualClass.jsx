@@ -36,8 +36,21 @@ const VirtualClass = () => {
                 userVideo.current.srcObject = currentStream;
             }
 
-            // 2. Join the Room
-            socket.emit('join-room', { roomId, userId });
+            // 1.5 Fetch Lecture Details to get CourseID for attendance
+            // We need to know which course this class belongs to for attendance
+            fetch(`/api/auth/lecture/${roomId}`) // Assuming public or auth-protected route
+                .then(res => res.json())
+                .then(data => {
+                    const courseId = data.courseId?._id || data.courseId; // Adjust based on population
+
+                    // 2. Join the Room
+                    socket.emit('join-room', { roomId, userId, courseId });
+                })
+                .catch(err => {
+                    console.error("Failed to fetch class info for attendance", err);
+                    // Fallback join without courseId (attendance might fail but video works)
+                    socket.emit('join-room', { roomId, userId });
+                });
 
             // 3. Listen: User Connected (Create Offer)
             socket.on('user-connected', (remoteUserId) => {
