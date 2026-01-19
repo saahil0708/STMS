@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MicrophoneIcon, PhoneXMarkIcon, ShareIcon } from '@heroicons/react/24/solid';
 import Peer from 'simple-peer';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useLogin } from '../../Context/LoginContext'; // Import Login Context
+import Peer from 'simple-peer';
 import { socket } from '../../socket';
 
 // Polyfill for global if missing (common in Vite with simple-peer)
@@ -21,6 +24,7 @@ import apiClient from '../../services/apiClient'; // Import apiClient
 const VirtualClass = () => {
     const { roomId } = useParams();
     const navigate = useNavigate();
+    const { user } = useLogin(); // Get user from context
     const [peers, setPeers] = useState([]);
     const [stream, setStream] = useState(null);
     const [isMuted, setIsMuted] = useState(false);
@@ -29,7 +33,8 @@ const VirtualClass = () => {
     const peersRef = useRef([]);
     const streamRef = useRef(null); // Ref to hold current stream for callbacks
     const params = new URLSearchParams(window.location.search);
-    const userId = params.get('userId') || 'student-' + Math.floor(Math.random() * 1000);
+    const userId = params.get('userId') || (user?._id || user?.id) || 'student-' + Math.floor(Math.random() * 1000);
+    const userName = (user?.name || user?.fullName || user?.firstName) || 'Guest';
 
     useEffect(() => {
         const handleJoin = async (currentStream) => {
@@ -90,10 +95,10 @@ const VirtualClass = () => {
                 const courseId = data.courseId?._id || data.courseId;
 
                 // 2. Join the Room
-                socket.emit('join-room', { roomId, userId: myUserId, courseId });
+                socket.emit('join-room', { roomId, userId: myUserId, userName, courseId });
             } catch (err) {
                 console.error("Failed to fetch class info for attendance", err);
-                socket.emit('join-room', { roomId, userId: myUserId });
+                socket.emit('join-room', { roomId, userId: myUserId, userName });
             }
         };
 
@@ -112,27 +117,31 @@ const VirtualClass = () => {
             });
 
         // 3. Listen: User Connected (Create Offer)
-        const handleUserConnected = (remoteUserId) => {
-            console.log("User connected:", remoteUserId);
+        const handleUserConnected = ({ userId: remoteUserId, userName: remoteUserName }) => {
+            console.log("User connected:", remoteUserId, remoteUserName);
             // Use streamRef.current instead of currentStream
-            const peer = createPeer(remoteUserId, socket.id, streamRef.current);
-            peersRef.current.push({
+            const peer = createPeer(remoteUserId, socket.id, streamRef.current, userName);
+            const peerObj = {
                 peerID: remoteUserId,
                 peer,
-            });
-            setPeers(users => [...users, { peerID: remoteUserId, peer }]);
+                userName: remoteUserName || 'Peer'
+            };
+            peersRef.current.push(peerObj);
+            setPeers(users => [...users, peerObj]);
         };
 
         // 4. Listen: Receive Offer (Create Answer)
         const handleReceiveOffer = (payload) => {
-            console.log("Received offer from:", payload.caller);
+            console.log("Received offer from:", payload.caller, payload.callerName);
             // Use streamRef.current instead of currentStream
             const peer = addPeer(payload.sdp, payload.caller, streamRef.current);
-            peersRef.current.push({
+            const peerObj = {
                 peerID: payload.caller,
                 peer,
-            });
-            setPeers(users => [...users, { peerID: payload.caller, peer }]);
+                userName: payload.callerName || 'Peer'
+            };
+            peersRef.current.push(peerObj);
+            setPeers(users => [...users, peerObj]);
         };
 
         // 5. Listen: Receive Answer
@@ -199,7 +208,7 @@ const VirtualClass = () => {
     }, []);
 
     // Create a new Peer (Initiator)
-    function createPeer(userToSignal, callerID, stream) {
+    function createPeer(userToSignal, callerID, stream, myName) {
         const peer = new Peer({
             initiator: true,
             trickle: false,
@@ -208,7 +217,7 @@ const VirtualClass = () => {
 
         // Send Offer
         peer.on('signal', signal => {
-            socket.emit('offer', { target: userToSignal, caller: callerID, sdp: signal });
+            socket.emit('offer', { target: userToSignal, caller: callerID, callerName: myName, sdp: signal });
         });
 
         return peer;
@@ -272,7 +281,9 @@ const VirtualClass = () => {
                 {/* My Video */}
                 <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-200">
                     <video muted ref={userVideo} autoPlay playsInline className="w-full h-full object-cover" />
-                    <span className="absolute bottom-3 left-3 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">You {isMuted ? '(Muted)' : ''}</span>
+                    <span className="absolute bottom-3 left-3 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                        {userName || 'You'} {isMuted ? '(Muted)' : ''}
+                    </span>
                 </div>
 
                 {/* Remote Videos */}
@@ -280,7 +291,9 @@ const VirtualClass = () => {
                     return (
                         <div key={index} className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-200">
                             <Video peer={peerObj.peer} />
-                            <span className="absolute bottom-3 left-3 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">Peer {peerObj.peerID.slice(0, 5)}</span>
+                            <span className="absolute bottom-3 left-3 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                                {peerObj.userName || `Peer ${peerObj.peerID.slice(0, 5)}`}
+                            </span>
                         </div>
                     );
                 })}
