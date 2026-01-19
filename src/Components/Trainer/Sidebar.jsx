@@ -8,7 +8,8 @@ import {
     X,
     LogOut,
     PlusCircle,
-    Briefcase
+    Briefcase,
+    Sparkles
 } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useLogin } from '../../Context/LoginContext';
@@ -26,6 +27,7 @@ const TrainerSidebar = ({ sidebarOpen, setSidebarOpen }) => {
         { name: 'Add Assignment', to: '/trainer/add-assignment', icon: FileText },
         { name: 'Schedule Class', to: '/trainer/schedule-class', icon: Calendar },
         { name: 'Grading', to: '/trainer/grading', icon: Briefcase },
+        { name: 'AI Assistant', to: '/trainer/chatbot', icon: Sparkles },
         { name: 'Settings', to: '/trainer/settings', icon: Settings },
     ];
 

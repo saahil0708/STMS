@@ -1,38 +1,75 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../../services/apiClient';
 import {
     UserIcon,
     AcademicCapIcon,
     MagnifyingGlassIcon,
-    FunnelIcon,
-    ChevronRightIcon
+    ShieldCheckIcon,
+    EyeIcon,
+    PencilSquareIcon,
+    TrashIcon
 } from '@heroicons/react/24/outline';
+import EditUserModal from './EditUserModal';
 
 const Users = () => {
-    const [activeTab, setActiveTab] = useState('students');
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState('students'); // students, trainers, admins
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Edit Modal State
+    const [editingUser, setEditingUser] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            let endpoint = '';
+            if (activeTab === 'students') endpoint = '/api/auth/student/students';
+            else if (activeTab === 'trainers') endpoint = '/api/auth/trainer/trainers';
+            else if (activeTab === 'admins') endpoint = '/api/auth/admin/admins';
+
+            const response = await apiClient.get(endpoint);
+            setUsers(response.data);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true);
-            try {
-                const endpoint = activeTab === 'students'
-                    ? '/api/auth/student/students'
-                    : '/api/auth/trainer/trainers';
-
-                const response = await apiClient.get(endpoint);
-                setUsers(response.data);
-            } catch (error) {
-                console.error('Error fetching users:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchUsers();
     }, [activeTab]);
+
+    const handleDelete = async (userId) => {
+        if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+
+        try {
+            // Role maps to singular for API usually, but let's check our endpoint
+            // Endpoint: /api/auth/admin/user/:role/:id
+            // Role should be 'student', 'trainer', 'admin'
+            const role = activeTab === 'students' ? 'student' : (activeTab === 'trainers' ? 'trainer' : 'admin');
+
+            await apiClient.delete(`/api/auth/admin/user/${role}/${userId}`);
+
+            // Remove from local state
+            setUsers(users.filter(u => u._id !== userId));
+        } catch (error) {
+            alert('Failed to delete user: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    const handleEditClick = (user) => {
+        setEditingUser(user);
+        setShowEditModal(true);
+    };
+
+    const handleUserUpdate = (updatedUser) => {
+        setUsers(users.map(u => u._id === updatedUser._id ? updatedUser : u));
+    };
 
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -53,12 +90,12 @@ const Users = () => {
 
                 {/* Tabs & Search */}
                 <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between gap-4 items-center">
-                    <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                    <div className="flex gap-2 p-1 bg-gray-100 rounded-lg overflow-x-auto max-w-full">
                         <button
                             onClick={() => setActiveTab('students')}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'students'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
@@ -69,13 +106,25 @@ const Users = () => {
                         <button
                             onClick={() => setActiveTab('trainers')}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'trainers'
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-indigo-600 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
                                 <UserIcon className="h-4 w-4" />
                                 Trainers
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('admins')}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'admins'
+                                ? 'bg-white text-red-600 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <ShieldCheckIcon className="h-4 w-4" />
+                                Admins
                             </div>
                         </button>
                     </div>
@@ -130,9 +179,11 @@ const Users = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 md:table-cell hidden">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${activeTab === 'students' ? 'bg-blue-50 text-blue-700' : 'bg-indigo-50 text-indigo-700'
-                                                        }`}>
-                                                        {activeTab}
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize 
+                                                        ${activeTab === 'students' ? 'bg-blue-50 text-blue-700' :
+                                                            activeTab === 'trainers' ? 'bg-indigo-50 text-indigo-700' : 'bg-red-50 text-red-700'}
+                                                    `}>
+                                                        {activeTab.slice(0, -1)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -145,9 +196,39 @@ const Users = () => {
                                                     </p>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <button className="text-gray-400 hover:text-indigo-600 transition-colors p-2">
-                                                        <ChevronRightIcon className="h-5 w-5" />
-                                                    </button>
+                                                    <div className="flex justify-end gap-2">
+                                                        {/* View Details - Only for students/trainers */}
+                                                        {activeTab !== 'admins' && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (activeTab === 'students') navigate(`/admin/student/${user._id}`);
+                                                                    if (activeTab === 'trainers') navigate(`/admin/trainer/${user._id}/details`); // Assuming route structure
+                                                                }}
+                                                                className="text-gray-400 hover:text-blue-600 transition-colors p-1"
+                                                                title="View Details"
+                                                            >
+                                                                <EyeIcon className="h-5 w-5" />
+                                                            </button>
+                                                        )}
+
+                                                        {/* Edit */}
+                                                        <button
+                                                            onClick={() => handleEditClick(user)}
+                                                            className="text-gray-400 hover:text-indigo-600 transition-colors p-1"
+                                                            title="Edit User"
+                                                        >
+                                                            <PencilSquareIcon className="h-5 w-5" />
+                                                        </button>
+
+                                                        {/* Delete */}
+                                                        <button
+                                                            onClick={() => handleDelete(user._id)}
+                                                            className="text-gray-400 hover:text-red-600 transition-colors p-1"
+                                                            title="Delete User"
+                                                        >
+                                                            <TrashIcon className="h-5 w-5" />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
@@ -164,6 +245,15 @@ const Users = () => {
                     )}
                 </div>
             </div>
+
+            {showEditModal && editingUser && (
+                <EditUserModal
+                    user={editingUser}
+                    role={activeTab === 'students' ? 'student' : (activeTab === 'trainers' ? 'trainer' : 'admin')}
+                    onClose={() => setShowEditModal(false)}
+                    onUpdate={handleUserUpdate}
+                />
+            )}
         </div>
     );
 };

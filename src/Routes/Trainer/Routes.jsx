@@ -9,7 +9,9 @@ import ScheduleClass from '../../Pages/Trainer/ScheduleClass';
 import Grading from '../../Pages/Trainer/Grading';
 import TrainerSettings from '../../Pages/Trainer/Settings';
 import VirtualClass from '../../Pages/Student/VirtualClass'; // Reusing the same component
-import OfflineAttendance from '../../pages/Trainer/OfflineAttendance';
+import OfflineAttendance from '../../Pages/Trainer/OfflineAttendance';
+import Chatbot from '../../Pages/Global/ChatBot';
+import StudentDetails from '../../Pages/Global/StudentDetails';
 
 const TrainerRoutes = createBrowserRouter([
     {
@@ -54,14 +56,18 @@ const TrainerRoutes = createBrowserRouter([
             },
 
             {
-        path: 'class/:roomId',
-        element: <VirtualClass />
-    },
-    {
-        path: 'attendance',
-        element: <OfflineAttendance />
-    }
-]
+                path: 'class/:roomId',
+                element: <VirtualClass />
+            },
+            {
+                path: 'attendance',
+                element: <OfflineAttendance />
+            },
+            {
+                path: 'chatbot',
+                element: <Chatbot />
+            }
+        ]
     }
 ]);
 

@@ -31,9 +31,10 @@ const AddUser = () => {
         setMessage({ type: '', text: '' });
 
         try {
-            const endpoint = userType === 'student'
-                ? '/api/auth/student/register'
-                : '/api/auth/trainer/register';
+            let endpoint = '';
+            if (userType === 'student') endpoint = '/api/auth/student/register';
+            else if (userType === 'trainer') endpoint = '/api/auth/trainer/register';
+            else if (userType === 'admin') endpoint = '/api/auth/admin/register';
 
             await apiClient.post(endpoint, formData);
             setMessage({ type: 'success', text: `${userType.charAt(0).toUpperCase() + userType.slice(1)} added successfully!` });
@@ -80,6 +81,13 @@ const AddUser = () => {
                                 }`}
                         >
                             Trainer
+                        </button>
+                        <button
+                            onClick={() => setUserType('admin')}
+                            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${userType === 'admin' ? 'bg-white shadow-sm text-red-600' : 'text-gray-500 hover:bg-white/50'
+                                }`}
+                        >
+                            Admin
                         </button>
                     </div>
 
@@ -153,7 +161,7 @@ const AddUser = () => {
                                 className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-70"
                             >
                                 <UserPlusIcon className="h-5 w-5" />
-                                {loading ? 'Creating...' : `Create ${userType === 'student' ? 'Student' : 'Trainer'}`}
+                                {loading ? 'Creating...' : `Create ${userType.charAt(0).toUpperCase() + userType.slice(1)}`}
                             </button>
                         </div>
                     </form>

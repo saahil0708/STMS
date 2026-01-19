@@ -8,7 +8,8 @@ import {
     X,
     LogOut,
     UserPlus,
-    Server
+    Server,
+    Sparkles
 } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useLogin } from '../../Context/LoginContext';
@@ -21,6 +22,7 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
     const navigation = [
         { name: 'Dashboard', to: '/admin', icon: Home },
+        { name: 'AI Assistant', to: '/admin/chatbot', icon: Sparkles },
         { name: 'Add User', to: '/admin/add-user', icon: UserPlus },
         { name: 'Manage Roles', to: '/admin/roles', icon: Shield },
         { name: 'Users', to: '/admin/users', icon: Users },
