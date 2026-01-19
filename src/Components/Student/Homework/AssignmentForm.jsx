@@ -23,6 +23,8 @@ const AssignmentForm = ({ questions = [], answers = {}, onAnswerChange }) => {
                             <textarea
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                                 rows="3"
+                 
+                 
                                 placeholder="Type your answer here..."
                                 value={answers[q.id] || ''}
                                 onChange={(e) => onAnswerChange(q.id, e.target.value)}

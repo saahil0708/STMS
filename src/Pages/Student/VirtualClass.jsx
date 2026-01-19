@@ -27,78 +27,131 @@ const VirtualClass = () => {
     const userId = params.get('userId') || 'student-' + Math.floor(Math.random() * 1000); // Get from Auth Context
 
     useEffect(() => {
-        socket.connect();
-
-        // 1. Get User Media (Camera/Mic)
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(currentStream => {
-            setStream(currentStream);
-            if (userVideo.current) {
-                userVideo.current.srcObject = currentStream;
+        const handleJoin = async (currentStream) => {
+            // Ensure socket is connected to get socket.id
+            if (!socket.connected) {
+                socket.connect();
+                await new Promise(resolve => {
+                    const onConnect = () => {
+                        socket.off('connect', onConnect);
+                        resolve();
+                    };
+                    socket.on('connect', onConnect);
+                    // Fallback if already connected race condition
+                    if (socket.connected) {
+                        socket.off('connect', onConnect);
+                        resolve();
+                    }
+                });
             }
 
+            const myUserId = socket.id;
+            console.log("Connected with ID:", myUserId);
+
             // 1.5 Fetch Lecture Details to get CourseID for attendance
-            // We need to know which course this class belongs to for attendance
-            fetch(`/api/auth/lecture/${roomId}`) // Assuming public or auth-protected route
-                .then(res => res.json())
-                .then(data => {
-                    const courseId = data.courseId?._id || data.courseId; // Adjust based on population
+            try {
+                const res = await fetch(`/api/auth/lecture/${roomId}`);
+                const data = await res.json();
+                const courseId = data.courseId?._id || data.courseId;
 
-                    // 2. Join the Room
-                    socket.emit('join-room', { roomId, userId, courseId });
-                })
-                .catch(err => {
-                    console.error("Failed to fetch class info for attendance", err);
-                    // Fallback join without courseId (attendance might fail but video works)
-                    socket.emit('join-room', { roomId, userId });
-                });
+                // 2. Join the Room
+                socket.emit('join-room', { roomId, userId: myUserId, courseId });
+            } catch (err) {
+                console.error("Failed to fetch class info for attendance", err);
+                socket.emit('join-room', { roomId, userId: myUserId });
+            }
+        };
 
-            // 3. Listen: User Connected (Create Offer)
-            socket.on('user-connected', (remoteUserId) => {
-                const peer = createPeer(remoteUserId, socket.id, currentStream);
-                peersRef.current.push({
-                    peerID: remoteUserId,
-                    peer,
-                });
-                setPeers(users => [...users, { peerID: remoteUserId, peer }]);
-            });
-
-            // 4. Listen: Receive Offer (Create Answer)
-            socket.on('offer', (payload) => {
-                const peer = addPeer(payload.sdp, payload.caller, currentStream);
-                peersRef.current.push({
-                    peerID: payload.caller,
-                    peer,
-                });
-                setPeers(users => [...users, { peerID: payload.caller, peer }]);
-            });
-
-            // 5. Listen: Receive Answer
-            socket.on('answer', (payload) => {
-                const item = peersRef.current.find(p => p.peerID === payload.caller);
-                if (item) {
-                    item.peer.signal(payload.sdp);
+        // 1. Get User Media (Camera/Mic)
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(currentStream => {
+                setStream(currentStream);
+                if (userVideo.current) {
+                    userVideo.current.srcObject = currentStream;
                 }
-            });
 
-            // 6. Listen: ICE Candidate
-            socket.on('ice-candidate', (payload) => {
-                const item = peersRef.current.find(p => p.peerID === payload.caller);
-                if (item) {
-                    item.peer.signal(payload.candidate);
-                }
-            });
+                // Initialize Socket & Listeners
+                handleJoin(currentStream);
 
-            // 7. Listen: User Disconnected
-            socket.on('user-disconnected', (id) => {
-                const peerObj = peersRef.current.find(p => p.peerID === id);
-                if (peerObj) peerObj.peer.destroy();
-                const peers = peersRef.current.filter(p => p.peerID !== id);
-                peersRef.current = peers;
-                setPeers(peers);
-            });
-        });
+                // 3. Listen: User Connected (Create Offer)
+                const handleUserConnected = (remoteUserId) => {
+                    console.log("User connected:", remoteUserId);
+                    const peer = createPeer(remoteUserId, socket.id, currentStream);
+                    peersRef.current.push({
+                        peerID: remoteUserId,
+                        peer,
+                    });
+                    setPeers(users => [...users, { peerID: remoteUserId, peer }]);
+                };
 
+                // 4. Listen: Receive Offer (Create Answer)
+                const handleReceiveOffer = (payload) => {
+                    console.log("Received offer from:", payload.caller);
+                    const peer = addPeer(payload.sdp, payload.caller, currentStream);
+                    peersRef.current.push({
+                        peerID: payload.caller,
+                        peer,
+                    });
+                    setPeers(users => [...users, { peerID: payload.caller, peer }]);
+                };
+
+                // 5. Listen: Receive Answer
+                const handleReceiveAnswer = (payload) => {
+                    console.log("Received answer from:", payload.caller);
+                    const item = peersRef.current.find(p => p.peerID === payload.caller);
+                    if (item) {
+                        item.peer.signal(payload.sdp);
+                    }
+                };
+
+                // 6. Listen: ICE Candidate
+                const handleIceCandidate = (payload) => {
+                    const item = peersRef.current.find(p => p.peerID === payload.caller);
+                    if (item) {
+                        item.peer.signal(payload.candidate);
+                    }
+                };
+
+                // 7. Listen: User Disconnected
+                const handleUserDisconnected = (id) => {
+                    console.log("User disconnected:", id);
+                    const peerObj = peersRef.current.find(p => p.peerID === id);
+                    if (peerObj) peerObj.peer.destroy();
+                    const peers = peersRef.current.filter(p => p.peerID !== id);
+                    peersRef.current = peers;
+                    setPeers(peers);
+                };
+
+                // Attach listeners
+                socket.on('user-connected', handleUserConnected);
+                socket.on('offer', handleReceiveOffer);
+                socket.on('answer', handleReceiveAnswer);
+                socket.on('ice-candidate', handleIceCandidate);
+                socket.on('user-disconnected', handleUserDisconnected);
+
+                // Cleanup function inside promise context
+                return () => {
+                    socket.off('user-connected', handleUserConnected);
+                    socket.off('offer', handleReceiveOffer);
+                    socket.off('answer', handleReceiveAnswer);
+                    socket.off('ice-candidate', handleIceCandidate);
+                    socket.off('user-disconnected', handleUserDisconnected);
+                };
+            })
+            .catch(err => console.error("Failed to get media", err));
+
+        // Global cleanup (runs on unmount)
         return () => {
+            // Remove all listeners to be safe or specific ones if we lifted variable scope
+            // Since listeners are defined inside the promise chain, we rely on the specific cleanup 
+            // logic above or brute force here if needed. 
+            // Best practice: remove specific listeners. 
+            // Due to scoping, we can't easily remove specific functions here if defined inside .then()
+            // So we'll use a brute force approach for these specific events which is safer for this singleton socket.
+            ['user-connected', 'offer', 'answer', 'ice-candidate', 'user-disconnected'].forEach(event => {
+                socket.removeAllListeners(event);
+            });
+
             socket.disconnect();
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());

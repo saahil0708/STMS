@@ -27,14 +27,26 @@ const Grading = () => {
                 const submissionList = Array.isArray(data) ? data : [];
                 setSubmissions(submissionList);
 
-                // Handle navigation from Dashboard
                 if (location.state?.selectedSubmissionId) {
                     const preSelected = submissionList.find(s => s._id === location.state.selectedSubmissionId);
                     if (preSelected) {
                         setSelectedSubmission(preSelected);
-                        // Optional: clear state to avoid re-selection on regular refresh? 
-                        // Actually, better to leave it or use history.replace() if we want to be clean.
-                        // For now, simpler is fine.
+                    } else {
+                        // If not in pending list (e.g. already graded), fetch specifically
+                        try {
+                            const specificRes = await apiClient.get(`/api/submission/${location.state.selectedSubmissionId}`);
+                            // Assuming response structure is { data: submission } or just submission
+                            const specificSub = specificRes.data.data || specificRes.data;
+
+                            if (specificSub) {
+                                setSelectedSubmission(specificSub);
+                                // Optional: Add to list if we want it visible in sidebar, 
+                                // but if it's "Pending Submissions" list, maybe not appropriate if already graded.
+                                // For now, just showing it in main area is sufficient.
+                            }
+                        } catch (err) {
+                            console.error("Failed to fetch specified submission", err);
+                        }
                     }
                 }
 
