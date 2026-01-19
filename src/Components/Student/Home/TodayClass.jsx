@@ -165,7 +165,7 @@ const TodaysClasses = () => {
                   <div className="flex flex-col items-end gap-2">
                     {classItem.type === 'virtual' && classItem.status === 'in-progress' && (
                       <a
-                        href={`/video-call/${classItem.roomId}`}
+                        href={`/class/${classItem.roomId}`}
                         className="px-3 py-1.5 bg-red-600 text-white text-xs font-bold uppercase rounded shadow hover:bg-red-700 transition-colors animate-pulse"
                       >
                         Join Live

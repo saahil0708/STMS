@@ -156,13 +156,7 @@ const VirtualClass = () => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Virtual Class: {roomId}</h1>
                 <div className="flex gap-2">
-                    <button
-                        onClick={copyJoinLink}
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-sm border border-indigo-100 hover:bg-indigo-50 transition"
-                    >
-                        <ShareIcon className="h-5 w-5" />
-                        <span className="hidden sm:inline">Invite Others</span>
-                    </button>
+                    {/* Share button removed as per requirements */}
                 </div>
             </div>
 

@@ -2,6 +2,16 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AdminHome from '../../Pages/Admin/Home';
 import AdminLayout from '../../Layout/Admin/Layout';
 import LoginPage from '../../Auth/Login';
+import AdminProfile from '../../pages/Admin/Profile';
+import Users from '../../pages/Admin/Users';
+import AddUser from '../../pages/Admin/AddUser';
+import Roles from '../../pages/Admin/Roles';
+import SystemHealth from '../../pages/Admin/System';
+import Reports from '../../pages/Admin/Reports';
+
+import AdminResults from '../../pages/Admin/Results';
+import AdminFeedback from '../../pages/Admin/Feedback';
+import AdminAttendance from '../../pages/Admin/Attendance';
 
 const AdminRoutes = createBrowserRouter([
     {
@@ -22,27 +32,43 @@ const AdminRoutes = createBrowserRouter([
             },
             {
                 path: 'add-user',
-                element: <div>Add User Page (Coming Soon)</div>
+                element: <AddUser />
             },
             {
                 path: 'roles',
-                element: <div>Manage Roles Page (Coming Soon)</div>
+                element: <Roles />
             },
             {
                 path: 'users',
-                element: <div>User List Page (Coming Soon)</div>
+                element: <Users />
             },
             {
                 path: 'system',
-                element: <div>System Health Page (Coming Soon)</div>
+                element: <SystemHealth />
             },
             {
                 path: 'reports',
-                element: <div>Reports Page (Coming Soon)</div>
+                element: <Reports />
+            },
+            {
+                path: 'results',
+                element: <AdminResults />
+            },
+            {
+                path: 'feedback',
+                element: <AdminFeedback />
+            },
+            {
+                path: 'attendance',
+                element: <AdminAttendance />
             },
             {
                 path: 'settings',
-                element: <div>Settings Page (Coming Soon)</div>
+                element: <AdminProfile />
+            },
+            {
+                path: 'profile',
+                element: <AdminProfile />
             }
         ]
     }

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import apiClient from '../../services/apiClient';
 import { useLogin } from '../../Context/LoginContext';
 import { ClipboardDocumentCheckIcon, UserCircleIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const Grading = () => {
     const { user } = useLogin();
+    const location = useLocation();
     const [submissions, setSubmissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedSubmission, setSelectedSubmission] = useState(null);
@@ -20,27 +22,21 @@ const Grading = () => {
         // Fetch pending submissions (assuming endpoint exists or filtering all)
         const fetchSubmissions = async () => {
             try {
-                // Using generic fetch and filtering client side if no specific pending endpoint
-                const response = await apiClient.get('/api/submission/trainer/pending');
-                // OR if that doesn't exist, we might need to get all and filter
-                // But let's assume valid endpoint from plan, or fallback
-
-                // If 404, we might need to adjust. For now sticking to plan:
-                // Plan said: GET /api/submission/trainer/pending - Wait, server.js showed SubmissionRoutes
-                // SubmissionRoutes has: POST /submit, POST /grade, GET /my-submissions
-                // It does NOT have a dedicated "Get All Pending for Trainer" endpoint explicitly listed in server.js snippet?
-                // Wait, checking snippet... 
-                // "router.get('/my-submissions', verifyTokenWithSession, getMySubmissions);" -> This is for student likely.
-                // There might be a missing endpoint for Trainer to view submissions. 
-                // I will try getting assignments first then their submissions, or assume a new endpoint needs to be created on backend?
-                // For now, I will try to fetch assignments I created, then their submissions. 
-                // BUT user said "do it" implying I should make it work. 
-                // Since I cannot change backend easily without causing issues, I will try to Mock/Handle or use a best guess endpoint.
-                // Let's try `/api/submission/pending` or similar. If fail, show empty.
-
                 const res = await apiClient.get('/api/submission/teacher/pending');
                 const data = res.data.data;
-                setSubmissions(Array.isArray(data) ? data : []);
+                const submissionList = Array.isArray(data) ? data : [];
+                setSubmissions(submissionList);
+
+                // Handle navigation from Dashboard
+                if (location.state?.selectedSubmissionId) {
+                    const preSelected = submissionList.find(s => s._id === location.state.selectedSubmissionId);
+                    if (preSelected) {
+                        setSelectedSubmission(preSelected);
+                        // Optional: clear state to avoid re-selection on regular refresh? 
+                        // Actually, better to leave it or use history.replace() if we want to be clean.
+                        // For now, simpler is fine.
+                    }
+                }
 
             } catch (error) {
                 console.error("Failed to load submissions", error);
@@ -50,7 +46,7 @@ const Grading = () => {
         };
 
         fetchSubmissions();
-    }, []);
+    }, [location.state]);
 
     const handleSelect = (sub) => {
         setSelectedSubmission(sub);
@@ -65,7 +61,7 @@ const Grading = () => {
         try {
             await apiClient.post('/api/submission/grade', {
                 submissionId: selectedSubmission._id,
-                grade: Number(gradeData.marks),
+                score: Number(gradeData.marks),
                 feedback: gradeData.feedback
             });
 
