@@ -8,11 +8,10 @@ import { socket } from '../../socket';
 if (typeof window !== 'undefined' && window.global === undefined) {
     window.global = window;
 }
-// Polyfill for process
-import * as process from 'process';
-if (typeof window !== 'undefined' && window.process === undefined) {
-    window.process = process;
-}
+
+// NOTE: Process polyfill is handled by vite-plugin-node-polyfills in vite.config.js
+// Removing manual import to avoid conflicts.
+
 
 
 const VirtualClass = () => {
@@ -21,6 +20,7 @@ const VirtualClass = () => {
     const [peers, setPeers] = useState([]);
     const [stream, setStream] = useState(null);
     const [isMuted, setIsMuted] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState('Connecting...'); // Debug state
     const userVideo = useRef();
     const peersRef = useRef([]); // To keep track of peer instances
     const params = new URLSearchParams(window.location.search);
@@ -34,12 +34,14 @@ const VirtualClass = () => {
                 await new Promise(resolve => {
                     const onConnect = () => {
                         socket.off('connect', onConnect);
+                        setConnectionStatus(`Connected: ${socket.id}`);
                         resolve();
                     };
                     socket.on('connect', onConnect);
                     // Fallback if already connected race condition
                     if (socket.connected) {
                         socket.off('connect', onConnect);
+                        setConnectionStatus(`Connected: ${socket.id}`);
                         resolve();
                     }
                 });
@@ -129,6 +131,14 @@ const VirtualClass = () => {
                 socket.on('ice-candidate', handleIceCandidate);
                 socket.on('user-disconnected', handleUserDisconnected);
 
+                // Listen: Connection Error
+                const handleConnectError = (err) => {
+                    console.error("Socket connection error:", err);
+                    setConnectionStatus(`Connection Error: ${err.message}`);
+                };
+
+                socket.on('connect_error', handleConnectError);
+
                 // Cleanup function inside promise context
                 return () => {
                     socket.off('user-connected', handleUserConnected);
@@ -136,6 +146,7 @@ const VirtualClass = () => {
                     socket.off('answer', handleReceiveAnswer);
                     socket.off('ice-candidate', handleIceCandidate);
                     socket.off('user-disconnected', handleUserDisconnected);
+                    socket.off('connect_error', handleConnectError);
                 };
             })
             .catch(err => console.error("Failed to get media", err));
@@ -220,7 +231,10 @@ const VirtualClass = () => {
     return (
         <div className="p-6 relative min-h-screen bg-gray-50 flex flex-col">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">Virtual Class: {roomId}</h1>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">Virtual Class: {roomId}</h1>
+                    <p className="text-xs text-gray-500">Status: {connectionStatus}</p>
+                </div>
                 <div className="flex gap-2">
                     {/* Share button removed as per requirements */}
                 </div>
