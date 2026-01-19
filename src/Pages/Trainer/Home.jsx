@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import QuickActions from '../../components/Trainer/Home/QuickActions';
-import Stats from '../../components/Trainer/Home/Stats';
-import TodayClasses from '../../components/Trainer/Home/TodayClasses';
+import QuickActions from '../../Components/Trainer/Home/QuickActions';
+import Stats from '../../Components/Trainer/Home/Stats';
+import TodayClasses from '../../Components/Trainer/Home/TodayClasses';
 import apiClient from '../../services/apiClient';
 
 const TrainerHome = () => {
