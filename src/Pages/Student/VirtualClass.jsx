@@ -2,9 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MicrophoneIcon, PhoneXMarkIcon, ShareIcon } from '@heroicons/react/24/solid';
 import Peer from 'simple-peer';
-import { useNavigate, useParams } from 'react-router-dom';
+// import { useNavigate, useParams } from 'react-router-dom';
 import { useLogin } from '../../Context/LoginContext'; // Import Login Context
-import Peer from 'simple-peer';
+// import Peer from 'simple-peer';
 import { socket } from '../../socket';
 
 // Polyfill for global if missing (common in Vite with simple-peer)
