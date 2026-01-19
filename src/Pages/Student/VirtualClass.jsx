@@ -14,46 +14,79 @@ if (typeof window !== 'undefined' && window.global === undefined) {
 
 
 
+import apiClient from '../../services/apiClient'; // Import apiClient
+
+// ... (existing imports)
+
 const VirtualClass = () => {
-    const { roomId } = useParams(); // URL parameter for Lecture ID
+    const { roomId } = useParams();
     const navigate = useNavigate();
     const [peers, setPeers] = useState([]);
     const [stream, setStream] = useState(null);
     const [isMuted, setIsMuted] = useState(false);
-    const [connectionStatus, setConnectionStatus] = useState('Connecting...'); // Debug state
+    const [connectionStatus, setConnectionStatus] = useState('Connecting...');
     const userVideo = useRef();
-    const peersRef = useRef([]); // To keep track of peer instances
+    const peersRef = useRef([]);
+    const streamRef = useRef(null); // Ref to hold current stream for callbacks
     const params = new URLSearchParams(window.location.search);
-    const userId = params.get('userId') || 'student-' + Math.floor(Math.random() * 1000); // Get from Auth Context
+    const userId = params.get('userId') || 'student-' + Math.floor(Math.random() * 1000);
 
     useEffect(() => {
         const handleJoin = async (currentStream) => {
+            // Update ref
+            streamRef.current = currentStream;
+
             // Ensure socket is connected to get socket.id
             if (!socket.connected) {
+                console.log("Socket not connected, attempting to connect...");
                 socket.connect();
-                await new Promise(resolve => {
-                    const onConnect = () => {
-                        socket.off('connect', onConnect);
-                        setConnectionStatus(`Connected: ${socket.id}`);
-                        resolve();
-                    };
-                    socket.on('connect', onConnect);
-                    // Fallback if already connected race condition
-                    if (socket.connected) {
-                        socket.off('connect', onConnect);
-                        setConnectionStatus(`Connected: ${socket.id}`);
-                        resolve();
-                    }
-                });
+                try {
+                    await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => {
+                            reject(new Error("Connection timeout"));
+                        }, 5000);
+
+                        const onConnect = () => {
+                            clearTimeout(timeout);
+                            socket.off('connect', onConnect);
+                            setConnectionStatus(`Connected: ${socket.id}`);
+                            resolve();
+                        };
+
+                        const onConnectError = (err) => {
+                            clearTimeout(timeout);
+                            socket.off('connect', onConnect);
+                            socket.off('connect_error', onConnectError);
+                            reject(err);
+                        };
+
+                        socket.on('connect', onConnect);
+                        socket.on('connect_error', onConnectError);
+
+                        if (socket.connected) {
+                            clearTimeout(timeout);
+                            socket.off('connect', onConnect);
+                            socket.off('connect_error', onConnectError);
+                            setConnectionStatus(`Connected: ${socket.id}`);
+                            resolve();
+                        }
+                    });
+                } catch (err) {
+                    console.error("Socket connection failed:", err);
+                    setConnectionStatus(`Connection Failed: ${err.message}`);
+                    return;
+                }
+            } else {
+                setConnectionStatus(`Connected: ${socket.id}`);
             }
 
             const myUserId = socket.id;
             console.log("Connected with ID:", myUserId);
 
-            // 1.5 Fetch Lecture Details to get CourseID for attendance
+            // 1.5 Fetch Lecture Details using apiClient (handles base URL automatically)
             try {
-                const res = await fetch(`/api/auth/lecture/${roomId}`);
-                const data = await res.json();
+                const res = await apiClient.get(`/auth/lecture/${roomId}`);
+                const data = res.data;
                 const courseId = data.courseId?._id || data.courseId;
 
                 // 2. Join the Room
@@ -71,85 +104,80 @@ const VirtualClass = () => {
                 if (userVideo.current) {
                     userVideo.current.srcObject = currentStream;
                 }
-
-                // Initialize Socket & Listeners
                 handleJoin(currentStream);
-
-                // 3. Listen: User Connected (Create Offer)
-                const handleUserConnected = (remoteUserId) => {
-                    console.log("User connected:", remoteUserId);
-                    const peer = createPeer(remoteUserId, socket.id, currentStream);
-                    peersRef.current.push({
-                        peerID: remoteUserId,
-                        peer,
-                    });
-                    setPeers(users => [...users, { peerID: remoteUserId, peer }]);
-                };
-
-                // 4. Listen: Receive Offer (Create Answer)
-                const handleReceiveOffer = (payload) => {
-                    console.log("Received offer from:", payload.caller);
-                    const peer = addPeer(payload.sdp, payload.caller, currentStream);
-                    peersRef.current.push({
-                        peerID: payload.caller,
-                        peer,
-                    });
-                    setPeers(users => [...users, { peerID: payload.caller, peer }]);
-                };
-
-                // 5. Listen: Receive Answer
-                const handleReceiveAnswer = (payload) => {
-                    console.log("Received answer from:", payload.caller);
-                    const item = peersRef.current.find(p => p.peerID === payload.caller);
-                    if (item) {
-                        item.peer.signal(payload.sdp);
-                    }
-                };
-
-                // 6. Listen: ICE Candidate
-                const handleIceCandidate = (payload) => {
-                    const item = peersRef.current.find(p => p.peerID === payload.caller);
-                    if (item) {
-                        item.peer.signal(payload.candidate);
-                    }
-                };
-
-                // 7. Listen: User Disconnected
-                const handleUserDisconnected = (id) => {
-                    console.log("User disconnected:", id);
-                    const peerObj = peersRef.current.find(p => p.peerID === id);
-                    if (peerObj) peerObj.peer.destroy();
-                    const peers = peersRef.current.filter(p => p.peerID !== id);
-                    peersRef.current = peers;
-                    setPeers(peers);
-                };
-
-                // Attach listeners
-                socket.on('user-connected', handleUserConnected);
-                socket.on('offer', handleReceiveOffer);
-                socket.on('answer', handleReceiveAnswer);
-                socket.on('ice-candidate', handleIceCandidate);
-                socket.on('user-disconnected', handleUserDisconnected);
-
-                // Listen: Connection Error
-                const handleConnectError = (err) => {
-                    console.error("Socket connection error:", err);
-                    setConnectionStatus(`Connection Error: ${err.message}`);
-                };
-
-                socket.on('connect_error', handleConnectError);
-
-                // Cleanup function inside promise context
-                return () => {
-                    socket.off('user-connected', handleUserConnected);
-                    socket.off('offer', handleReceiveOffer);
-                    socket.off('answer', handleReceiveAnswer);
-                    socket.off('ice-candidate', handleIceCandidate);
-                    socket.off('user-disconnected', handleUserDisconnected);
-                    socket.off('connect_error', handleConnectError);
-                };
             })
-            .catch(err => console.error("Failed to get media", err));
+            .catch(err => {
+                console.error("Failed to get media", err);
+                handleJoin(null);
+            });
+
+        // 3. Listen: User Connected (Create Offer)
+        const handleUserConnected = (remoteUserId) => {
+            console.log("User connected:", remoteUserId);
+            // Use streamRef.current instead of currentStream
+            const peer = createPeer(remoteUserId, socket.id, streamRef.current);
+            peersRef.current.push({
+                peerID: remoteUserId,
+                peer,
+            });
+            setPeers(users => [...users, { peerID: remoteUserId, peer }]);
+        };
+
+        // 4. Listen: Receive Offer (Create Answer)
+        const handleReceiveOffer = (payload) => {
+            console.log("Received offer from:", payload.caller);
+            // Use streamRef.current instead of currentStream
+            const peer = addPeer(payload.sdp, payload.caller, streamRef.current);
+            peersRef.current.push({
+                peerID: payload.caller,
+                peer,
+            });
+            setPeers(users => [...users, { peerID: payload.caller, peer }]);
+        };
+
+        // 5. Listen: Receive Answer
+        const handleReceiveAnswer = (payload) => {
+            console.log("Received answer from:", payload.caller);
+            const item = peersRef.current.find(p => p.peerID === payload.caller);
+            if (item) {
+                item.peer.signal(payload.sdp);
+            }
+        };
+
+        // 6. Listen: ICE Candidate
+        const handleIceCandidate = (payload) => {
+            const item = peersRef.current.find(p => p.peerID === payload.caller);
+            if (item) {
+                item.peer.signal(payload.candidate);
+            }
+        };
+
+        // 7. Listen: User Disconnected
+        const handleUserDisconnected = (id) => {
+            console.log("User disconnected:", id);
+            const peerObj = peersRef.current.find(p => p.peerID === id);
+            if (peerObj) peerObj.peer.destroy();
+            const peers = peersRef.current.filter(p => p.peerID !== id);
+            peersRef.current = peers;
+            setPeers(peers);
+        };
+
+        // Attach listeners
+        socket.on('user-connected', handleUserConnected);
+        socket.on('offer', handleReceiveOffer);
+        socket.on('answer', handleReceiveAnswer);
+        socket.on('ice-candidate', handleIceCandidate);
+        socket.on('user-disconnected', handleUserDisconnected);
+
+        // Listen: Connection Error
+        const handleConnectError = (err) => {
+            console.error("Socket connection error:", err);
+            setConnectionStatus(`Connection Error: ${err.message}`);
+        };
+
+        socket.on('connect_error', handleConnectError);
+
+
 
         // Global cleanup (runs on unmount)
         return () => {
@@ -159,7 +187,7 @@ const VirtualClass = () => {
             // Best practice: remove specific listeners. 
             // Due to scoping, we can't easily remove specific functions here if defined inside .then()
             // So we'll use a brute force approach for these specific events which is safer for this singleton socket.
-            ['user-connected', 'offer', 'answer', 'ice-candidate', 'user-disconnected'].forEach(event => {
+            ['user-connected', 'offer', 'answer', 'ice-candidate', 'user-disconnected', 'connect_error'].forEach(event => {
                 socket.removeAllListeners(event);
             });
 
