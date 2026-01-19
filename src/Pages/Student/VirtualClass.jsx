@@ -4,6 +4,7 @@ import { MicrophoneIcon, PhoneXMarkIcon, ShareIcon } from '@heroicons/react/24/s
 import Peer from 'simple-peer';
 // import { useNavigate, useParams } from 'react-router-dom';
 import { useLogin } from '../../Context/LoginContext'; // Import Login Context
+import { useToast } from '../../Context/ToastContext'; // Import Toast Context
 // import Peer from 'simple-peer';
 import { socket } from '../../socket';
 
@@ -25,6 +26,7 @@ const VirtualClass = () => {
     const { roomId } = useParams();
     const navigate = useNavigate();
     const { user } = useLogin(); // Get user from context
+    const { showToast } = useToast(); // Get toast function
     const [peers, setPeers] = useState([]);
     const [stream, setStream] = useState(null);
     const [isMuted, setIsMuted] = useState(false);
@@ -48,7 +50,7 @@ const VirtualClass = () => {
 
             // Ensure socket is connected to get socket.id
             if (!socket.connected) {
-                console.log("Socket not connected, attempting to connect...");
+                // console.log("Socket not connected, attempting to connect...");
                 socket.connect();
                 try {
                     await new Promise((resolve, reject) => {
@@ -59,7 +61,7 @@ const VirtualClass = () => {
                         const onConnect = () => {
                             clearTimeout(timeout);
                             socket.off('connect', onConnect);
-                            setConnectionStatus(`Connected: ${socket.id}`);
+                            setConnectionStatus(`Connected`);
                             resolve();
                         };
 
@@ -77,21 +79,22 @@ const VirtualClass = () => {
                             clearTimeout(timeout);
                             socket.off('connect', onConnect);
                             socket.off('connect_error', onConnectError);
-                            setConnectionStatus(`Connected: ${socket.id}`);
+                            setConnectionStatus(`Connected`);
                             resolve();
                         }
                     });
                 } catch (err) {
-                    console.error("Socket connection failed:", err);
-                    setConnectionStatus(`Connection Failed: ${err.message}`);
+                    // console.error("Socket connection failed:", err);
+                    setConnectionStatus(`Connection Failed`);
+                    showToast(`Connection Failed: ${err.message}`, 'error');
                     return;
                 }
             } else {
-                setConnectionStatus(`Connected: ${socket.id}`);
+                setConnectionStatus(`Connected`);
             }
 
             const myUserId = socket.id;
-            console.log("Connected with ID:", myUserId);
+            // console.log("Connected with ID:", myUserId);
 
             // 1.5 Fetch Lecture Details using apiClient (handles base URL automatically)
             try {
@@ -102,7 +105,7 @@ const VirtualClass = () => {
                 // 2. Join the Room
                 socket.emit('join-room', { roomId, userId: myUserId, userName, courseId });
             } catch (err) {
-                console.error("Failed to fetch class info for attendance", err);
+                // console.error("Failed to fetch class info for attendance", err);
                 socket.emit('join-room', { roomId, userId: myUserId, userName });
             }
         };
@@ -117,18 +120,18 @@ const VirtualClass = () => {
                 handleJoin(currentStream);
             })
             .catch(err => {
-                console.error("Failed to get media", err);
+                // console.error("Failed to get media", err);
+                showToast(`Camera access denied. You can only watch the class.`, 'warning');
                 handleJoin(null);
             });
 
         // 3. Listen: User Connected (Create Offer)
         const handleUserConnected = ({ userId: remoteUserId, userName: remoteUserName }) => {
             if (!isMounted.current) return;
-            console.log("User connected:", remoteUserId, remoteUserName);
+            // console.log("User connected:", remoteUserId, remoteUserName);
 
             // Deduplication: Check if peer already exists
             if (peersRef.current.some(p => p.peerID === remoteUserId)) {
-                console.log("Peer already exists, skipping:", remoteUserId);
                 return;
             }
 
@@ -141,16 +144,16 @@ const VirtualClass = () => {
             };
             peersRef.current.push(peerObj);
             setPeers(users => [...users, peerObj]);
+            showToast(`${remoteUserName || 'A user'} joined`, 'info');
         };
 
         // 4. Listen: Receive Offer (Create Answer)
         const handleReceiveOffer = (payload) => {
             if (!isMounted.current) return;
-            console.log("Received offer from:", payload.caller, payload.callerName);
+            // console.log("Received offer from:", payload.caller, payload.callerName);
 
             // Deduplication: Check if peer already exists
             if (peersRef.current.some(p => p.peerID === payload.caller)) {
-                console.log("Peer already exists (received offer), skipping:", payload.caller);
                 return;
             }
 
@@ -167,7 +170,7 @@ const VirtualClass = () => {
 
         // 5. Listen: Receive Answer
         const handleReceiveAnswer = (payload) => {
-            console.log("Received answer from:", payload.caller);
+            // console.log("Received answer from:", payload.caller);
             const item = peersRef.current.find(p => p.peerID === payload.caller);
             if (item) {
                 item.peer.signal(payload.sdp);
@@ -184,9 +187,12 @@ const VirtualClass = () => {
 
         // 7. Listen: User Disconnected
         const handleUserDisconnected = (id) => {
-            console.log("User disconnected:", id);
+            // console.log("User disconnected:", id);
             const peerObj = peersRef.current.find(p => p.peerID === id);
-            if (peerObj) peerObj.peer.destroy();
+            if (peerObj) {
+                peerObj.peer.destroy();
+                showToast(`${peerObj.userName || 'A user'} left`, 'info');
+            }
             const peers = peersRef.current.filter(p => p.peerID !== id);
             peersRef.current = peers;
             setPeers(peers);
@@ -201,15 +207,16 @@ const VirtualClass = () => {
 
         // Listen: Connection Error
         const handleConnectError = (err) => {
-            console.error("Socket connection error:", err);
-            setConnectionStatus(`Connection Error: ${err.message}`);
+            // console.error("Socket connection error:", err);
+            setConnectionStatus(`Connection Error`);
+            showToast(`Connection Error: ${err.message}`, 'error');
         };
 
         socket.on('connect_error', handleConnectError);
 
         // Listen for Class End
         const handleClassEnded = () => {
-            alert("The class has been ended by the trainer.");
+            showToast("The class has been ended by the trainer.", "info");
             endCall();
         };
         socket.on('class-ended', handleClassEnded);
@@ -298,7 +305,7 @@ const VirtualClass = () => {
     const copyJoinLink = () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url);
-        alert('Class link copied to clipboard!');
+        showToast('Class link copied to clipboard!', 'success');
     };
 
     return (

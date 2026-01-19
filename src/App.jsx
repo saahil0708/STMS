@@ -1,9 +1,6 @@
-import StudentRoutes from "./Routes/Student/Routes";
-import TrainerRoutes from "./Routes/Trainer/Routes";
-import AdminRoutes from "./Routes/Admin/Routes";
-import { RouterProvider } from "react-router-dom";
-import { useLogin } from "./Context/LoginContext";
-import { Loader2 } from "lucide-react";
+import { ToastProvider } from "./Context/ToastContext";
+
+// ... existing imports
 
 export default function App() {
   const { user, loading } = useLogin();
@@ -27,5 +24,9 @@ export default function App() {
     }
   }
 
-  return <RouterProvider router={activeRouter} />;
+  return (
+    <ToastProvider>
+      <RouterProvider router={activeRouter} />
+    </ToastProvider>
+  );
 } 
