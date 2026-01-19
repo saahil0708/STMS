@@ -32,12 +32,17 @@ const VirtualClass = () => {
     const userVideo = useRef();
     const peersRef = useRef([]);
     const streamRef = useRef(null); // Ref to hold current stream for callbacks
+    const isMounted = useRef(false); // Track mount status
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('userId') || (user?._id || user?.id) || 'student-' + Math.floor(Math.random() * 1000);
     const userName = (user?.name || user?.fullName || user?.firstName) || 'Guest';
 
     useEffect(() => {
+        isMounted.current = true; // Set mounted flag
+
         const handleJoin = async (currentStream) => {
+            if (!isMounted.current) return; // Prevent execution if unmounted
+
             // Update ref
             streamRef.current = currentStream;
 
@@ -118,7 +123,15 @@ const VirtualClass = () => {
 
         // 3. Listen: User Connected (Create Offer)
         const handleUserConnected = ({ userId: remoteUserId, userName: remoteUserName }) => {
+            if (!isMounted.current) return;
             console.log("User connected:", remoteUserId, remoteUserName);
+
+            // Deduplication: Check if peer already exists
+            if (peersRef.current.some(p => p.peerID === remoteUserId)) {
+                console.log("Peer already exists, skipping:", remoteUserId);
+                return;
+            }
+
             // Use streamRef.current instead of currentStream
             const peer = createPeer(remoteUserId, socket.id, streamRef.current, userName);
             const peerObj = {
@@ -132,7 +145,15 @@ const VirtualClass = () => {
 
         // 4. Listen: Receive Offer (Create Answer)
         const handleReceiveOffer = (payload) => {
+            if (!isMounted.current) return;
             console.log("Received offer from:", payload.caller, payload.callerName);
+
+            // Deduplication: Check if peer already exists
+            if (peersRef.current.some(p => p.peerID === payload.caller)) {
+                console.log("Peer already exists (received offer), skipping:", payload.caller);
+                return;
+            }
+
             // Use streamRef.current instead of currentStream
             const peer = addPeer(payload.sdp, payload.caller, streamRef.current);
             const peerObj = {
@@ -186,17 +207,25 @@ const VirtualClass = () => {
 
         socket.on('connect_error', handleConnectError);
 
+        // Listen for Class End
+        const handleClassEnded = () => {
+            alert("The class has been ended by the trainer.");
+            endCall();
+        };
+        socket.on('class-ended', handleClassEnded);
+
 
 
         // Global cleanup (runs on unmount)
         return () => {
+            isMounted.current = false; // Mark unmounted
             // Remove all listeners to be safe or specific ones if we lifted variable scope
             // Since listeners are defined inside the promise chain, we rely on the specific cleanup 
             // logic above or brute force here if needed. 
             // Best practice: remove specific listeners. 
             // Due to scoping, we can't easily remove specific functions here if defined inside .then()
             // So we'll use a brute force approach for these specific events which is safer for this singleton socket.
-            ['user-connected', 'offer', 'answer', 'ice-candidate', 'user-disconnected', 'connect_error'].forEach(event => {
+            ['user-connected', 'offer', 'answer', 'ice-candidate', 'user-disconnected', 'connect_error', 'class-ended'].forEach(event => {
                 socket.removeAllListeners(event);
             });
 
@@ -259,6 +288,13 @@ const VirtualClass = () => {
         navigate('/'); // Navigate back to home
     };
 
+    const endClass = () => {
+        if (window.confirm("Are you sure you want to end this class for everyone?")) {
+            socket.emit('end-class', { roomId });
+            // We don't need to call endCall() here immediately, because the server will emit 'class-ended' back to us
+        }
+    };
+
     const copyJoinLink = () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url);
@@ -312,10 +348,21 @@ const VirtualClass = () => {
                 <button
                     onClick={endCall}
                     className="p-4 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-lg hover:shadow-red-200 transition-all scale-100 hover:scale-110"
-                    title="End Call"
+                    title="Leave Call"
                 >
                     <PhoneXMarkIcon className="h-8 w-8" />
                 </button>
+
+                {/* End Class Button (Trainers Only) */}
+                {user?.role === 'trainer' && (
+                    <button
+                        onClick={endClass}
+                        className="p-4 rounded-full bg-red-800 text-white hover:bg-red-900 shadow-lg hover:shadow-red-200 transition-all scale-100 hover:scale-110 font-bold text-xs"
+                        title="End Class for Everyone"
+                    >
+                        END CLASS
+                    </button>
+                )}
             </div>
         </div>
     );
