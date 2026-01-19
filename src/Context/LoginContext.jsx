@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import apiClient from '../services/apiClient';
+import { useToast } from './ToastContext'; // Import Toast Hook
 
 const LoginContext = createContext();
 
@@ -13,8 +14,9 @@ export const useLogin = () => {
 
 export const LoginProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Start as loading for initial session check
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const { showToast } = useToast(); // Get toast function
 
     // Restore user and verify session from Redis on mount
     useEffect(() => {
@@ -79,7 +81,6 @@ export const LoginProvider = ({ children }) => {
 
             let { user, token } = response.data;
 
-            // Handle various response structures
             if (!user && response.data.data) user = response.data.data;
             if (!user && response.data[role]) user = response.data[role];
 
@@ -87,7 +88,6 @@ export const LoginProvider = ({ children }) => {
                 throw new Error('Invalid server response: Missing user or token');
             }
 
-            // Ensure role is present in user object
             if (!user.role) {
                 user.role = role;
             }
@@ -96,12 +96,14 @@ export const LoginProvider = ({ children }) => {
             localStorage.setItem('user', JSON.stringify(user));
 
             setUser(user);
+            showToast(`Welcome back, ${user.name || 'User'}!`, 'success'); // Show Success Toast
             return user;
         } catch (err) {
             console.error('Login error:', err);
 
             const errorMsg = err.response?.data?.message || 'Invalid email or password.';
             setError(errorMsg);
+            showToast(errorMsg, 'error'); // Show Error Toast
             throw new Error(errorMsg);
         } finally {
             setLoading(false);
@@ -119,6 +121,7 @@ export const LoginProvider = ({ children }) => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setUser(null);
+            showToast('Logged out successfully', 'info'); // Show Logout Toast
         }
     };
 

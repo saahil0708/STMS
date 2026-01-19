@@ -20,8 +20,6 @@ if (typeof window !== 'undefined' && window.global === undefined) {
 
 import apiClient from '../../services/apiClient'; // Import apiClient
 
-// ... (existing imports)
-
 const VirtualClass = () => {
     const { roomId } = useParams();
     const navigate = useNavigate();
