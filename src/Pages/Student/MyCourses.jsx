@@ -150,20 +150,8 @@ const StudentMyCourses = () => {
                                     </div>
 
                                     <Link
-                                        to={`/course/${course._id}`} // Assuming course detail page exists or will exist
-                                        // For now, if no detail page, maybe link to class/assignments? 
-                                        // Let's link to homework status or similar for now if strictly no detail page
-                                        // But standards suggest a detail page. I'll point to /course/:id which might be 404 if not built.
-                                        // Better: Point to /homework for now or simple "View"
-                                        // Actually, let's just make it a "View Details" button that might go nowhere or placeholder
+                                        to={`/course/${course._id}`}
                                         className="w-full mt-auto flex items-center justify-center px-4 py-2 border border-red-600 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
-                                        onClick={e => {
-                                            // Since we haven't explicitly built Course Detail page for Student yet, 
-                                            // prevent navigation to empty page if it doesn't exist.
-                                            // But user asked for "My Courses" page, not "Course Detail".
-                                            // Ideally this should go to a course dashboard.
-                                            // I will leave the link but might need to handle 404 elsewhere or build detail page later.
-                                        }}
                                     >
                                         View Content
                                         <ArrowRightIcon className="h-4 w-4 ml-2" />

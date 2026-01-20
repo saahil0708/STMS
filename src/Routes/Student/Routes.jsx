@@ -14,6 +14,7 @@ import LoginPage from '../../Auth/Login';
 import VirtualClass from '../../Pages/Student/VirtualClass';
 import EnrollCourse from '../../Pages/Student/EnrollCourse';
 import StudentMyCourses from '../../Pages/Student/MyCourses';
+import CourseContent from '../../Pages/Student/CourseContent';
 
 const StudentRoutes = createBrowserRouter([
     {
@@ -67,6 +68,10 @@ const StudentRoutes = createBrowserRouter([
                     {
                         path: '/courses',
                         element: <StudentMyCourses />
+                    },
+                    {
+                        path: '/course/:courseId',
+                        element: <CourseContent />
                     },
                     {
                         path: '/chatbot',
