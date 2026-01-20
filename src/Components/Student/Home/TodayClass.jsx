@@ -9,12 +9,21 @@ import {
   CalendarIcon,
   ChevronRightIcon,
   CheckCircleIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
+import FeedbackModal from '../../Global/FeedbackModal';
 
 const TodaysClasses = () => {
   const [todaysClasses, setTodaysClasses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [selectedLectureForFeedback, setSelectedLectureForFeedback] = useState(null);
+
+  const openFeedbackModal = (lecture) => {
+    setSelectedLectureForFeedback(lecture);
+    setIsFeedbackModalOpen(true);
+  };
 
   useEffect(() => {
     fetchLectures();
@@ -25,10 +34,15 @@ const TodaysClasses = () => {
     try {
       // Calculate local YYYY-MM-DD to handle timezone differences with server (e.g. UTC server vs Local user)
       const localDate = new Date().toLocaleDateString('en-CA'); // 'en-CA' gives YYYY-MM-DD
+      console.log(`[TodayClass] Fetching lectures for date: ${localDate}`);
+
       const response = await apiClient.get(`/api/auth/lecture/today?date=${localDate}`);
+      console.log("[TodayClass] Raw API Response:", response.data);
+
       const data = response.data.lectures || []; // Controller returns { lectures: [] }
 
       const mapped = data.map(l => {
+        console.log(`[TodayClass] Lecture ${l._id} - ${l.courseId?.title} - Server Status: ${l.status}`);
         const startTime = new Date(l.timing);
         const now = new Date();
         const duration = l.duration || 60; // Default 60 mins if missing
@@ -40,6 +54,10 @@ const TodaysClasses = () => {
         if (l.status === 'completed') {
           status = 'completed';
         }
+        // Auto-complete if time has passed (for offline classes or forgotten virtuals)
+        else if (now > endTime) {
+          status = 'completed';
+        }
         // Otherwise use time-based logic for in-progress vs upcoming
         else if (now >= startTime) {
           status = 'in-progress';
@@ -49,6 +67,7 @@ const TodaysClasses = () => {
 
         return {
           id: l._id,
+          originalCourseId: l.courseId?._id, // Needed for feedback
           course: l.courseId?.title || 'Unknown Course',
           instructor: l.courseId?.trainerId?.name || 'Your Trainer',
           time: startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -184,6 +203,16 @@ const TodaysClasses = () => {
                       </span>
                     )}
 
+                    {classItem.status === 'completed' && (
+                      <button
+                        onClick={() => openFeedbackModal(classItem)}
+                        className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase rounded shadow hover:bg-indigo-100 transition-colors"
+                      >
+                        <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                        <span>Feedback</span>
+                      </button>
+                    )}
+
                     <button className="p-1.5 border border-gray-200 rounded-lg hover:bg-white hover:shadow-sm transition-all text-gray-400 hover:text-red-700 transform hover:scale-110 active:scale-95">
                       <ChevronRightIcon className="h-4 w-4" />
                     </button>
@@ -252,6 +281,13 @@ const TodaysClasses = () => {
           </div>
         </div>
       )}
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        closeModal={() => setIsFeedbackModalOpen(false)}
+        lecture={selectedLectureForFeedback}
+      />
     </div>
   );
 };

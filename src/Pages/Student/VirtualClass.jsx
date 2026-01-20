@@ -293,10 +293,20 @@ const VirtualClass = () => {
         navigate('/'); // Navigate back to home
     };
 
-    const endClass = () => {
+    const endClass = async () => {
         if (window.confirm("Are you sure you want to end this class for everyone?")) {
+            try {
+                // Use API to update DB and invalidate cache reliably
+                console.log(`[VirtualClass] Ending class via API for roomId: ${roomId}`);
+                await apiClient.put(`/api/auth/lecture/${roomId}`, { status: 'completed' });
+                showToast("Class marked as completed.", "success");
+            } catch (err) {
+                console.error("Failed to end class via API:", err);
+                showToast("Failed to update class status.", "error");
+            }
+
+            console.log(`[VirtualClass] Emitting end-class socket event for roomId: ${roomId}`);
             socket.emit('end-class', { roomId });
-            // We don't need to call endCall() here immediately, because the server will emit 'class-ended' back to us
         }
     };
 
